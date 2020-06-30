@@ -245,7 +245,7 @@ and 10. It's input layer has a size of 25, and it's output layer a size of 5.
 				"outputs": "input->output0",
 			},
 			{
-				"id": "hidden1"
+				"id": "hidden1",
 				"operation": "mlplayer",
 				"inputs: ["hidden1<-input0"],
 				"outputs": ["hidden1->output0"],
