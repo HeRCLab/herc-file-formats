@@ -251,45 +251,45 @@ and 10. It's input layer has a size of 25, and it's output layer a size of 5.
 				"outputs": ["hidden1->output0"],
 			},
 			{
-				"id": "activaton1"
+				"id": "activaton1",
 				"operation": "relu",
 				"inputs: ["activation1<-input0"],
 				"outputs": ["activation1->output0"],
 			},
 			{
-				"id": "hidden2"
+				"id": "hidden2",
 				"operation": "mlplayer",
 				"inputs: ["hidden2<-input0"],
 				"outputs": ["hidden2->output0"],
 			},
 			{
-				"id": "activaton2"
+				"id": "activaton2",
 				"operation": "relu",
 				"inputs: ["activation2<-input0"],
 				"outputs": ["activation2->output0"],
 			},
 			{
-				"id": "hidden3"
+				"id": "hidden3",
 				"operation": "mlplayer",
 				"inputs: ["hidden3<-input0"],
 				"outputs": ["hidden3->output0"],
 			},
 			{
-				"id": "activaton3"
+				"id": "activaton3",
 				"operation": "relu",
 				"inputs: ["activation3<-input0"],
 				"outputs": ["activation3->output0"],
 			},
 			{
 				"id": "output",
-				"operation": "output"
+				"operation": "output",
 				"inputs": "output<-input0"
 			}
 		],
 		"links": [
 			{
 				"source": "input->output0",
-				"target": "hidden1<-input0",
+				"target": "hidden1<-input0"
 			},
 			{
 				"source": "hidden1->output0",
@@ -313,7 +313,7 @@ and 10. It's input layer has a size of 25, and it's output layer a size of 5.
 			},
 			{
 				"source": "activation3->output0",
-				"target": "output<-input0""
+				"target": "output<-input0"
 			},
 		]
 	},
@@ -328,14 +328,14 @@ and 10. It's input layer has a size of 25, and it's output layer a size of 5.
 		"hidden2": {
 			"neurons": 15,
 			"activation": "activation2"
-		}
+		},
 		"hidden3": {
 			"neurons": 15,
 			"activation": "activation3"
-		}
+		},
 		"output": {
 			"dimensions": [5]
-		},
+		}
 	}
 }
 ```
