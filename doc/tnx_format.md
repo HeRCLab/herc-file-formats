@@ -9,7 +9,7 @@ objective of NNX is to provide a format for initializing neural networks with
 common weights, and to examine their internal values later, for the purpose of
 cross-validating different implementations.
 
-At present TNX targets exclusively MLP networks, but in the future could expand
+At present TNX exclusively targets MLP networks, but in the future could expand
 to accommodate other types. Unlike other formats such as ONNX, TNX assumes that
 the computation medium used by the network operates analogously to a multilayer
 perception, where each layer has a set of weights, a set of biases, and an
@@ -70,7 +70,7 @@ identifiers of the form `nodeid->outputname`. This is purely a convention,
 implementations **should not** rely on this naming scheme to derive any
 information about the structure of the graph.
 
-Inputs to the graph are defined by the `input` operation type, such nodes
+Inputs to the graph are defined by the `input` operation type. Such nodes
 should have an empty `inputs` list.
 
 Outputs of the graph are defined by the `output `operation type. Such nodes
@@ -78,11 +78,11 @@ should have an empty `outputs` list.
 
 ## Parameterization
 
-A parameterization is used to describe parameters of nodes in the graph.  This
-is distinct from the concept of a snapshot insofar as that a parameter
-describes something about the graph which always holds for a given instance of
-the graph, while a snapshot is intended to represent the execution state of
-the graph at a particular time.
+A parameterization is used to describe parameters of nodes in the graph.
+Snapshots are distinct from parameters: a parameter describes something about
+the graph which *always holds* for a given instance of the graph, while a
+snapshot is intended to represent the execution state of the graph at a
+particular time.
 
 If one imagines compiling the graph to an FPGA using HLS, changing "parameters"
 in the sense used in this document would require re-compiling the graph,
@@ -92,7 +92,7 @@ instant in time.
 
 A TNX parameterization is a table where keys are node IDs (which **must** be
 valid node IDs occurring within the topology definition), and values are
-arbitrary JSON objects. The parameterization of a node is specific to it's
+arbitrary JSON objects. The parameterization of a node is specific to its
 operation.
 
 ## Snapshot Definition
@@ -104,7 +104,7 @@ to what type of node it pertains to.
 
 A TNX snapshot definition is a list of JSON objects, each of which may be of
 one of several types. All such objects **must** have a `type` field identifying
-it's type.  Other fields are specific to each type.
+its type.  Other fields are specific to each type.
 
 The following `type` values are allowed:
 
@@ -127,8 +127,8 @@ A matrix object **must** have the following keys:
 
 ## Operations
 
-An operation refers to a computation which is performed by a node on it's
-inputs, which **may** causes it's outputs to change. Not all client
+An operation refers to a computation which is performed by a node on its
+inputs, which **may** causes its outputs to change. Not all client
 implementations need to implement all operations described in this document,
 but **should** throw an informative error and exit if an unsupported operation
 is given as input.
@@ -142,10 +142,10 @@ collisions with other implementations. Operation names beginning with the
 characters `e:` are reserved for the official implementation for
 experimentation and development purposes.
 
-All node inputs and outputs are snapshot-ed using the `matrix` type. Such
+All node inputs and outputs are snapshotted using the `matrix` type. Such
 snapshots **must** refer to the input or output ID (rather than the ID of the
 node itself). The matrix `name` field is not relevant in this context. When an
-operation describes the dimensions of it's inputs or outputs, the relevant
+operation describes the dimensions of its inputs or outputs, the relevant
 snapshots, if any, **must** use the same dimensions.
 
 There are two special-case operations, used to pass input into and out of the
@@ -156,7 +156,7 @@ graph.
 
 The `input` operation is used to consume input from the outside world.
 
-It's parameterization **must** define a `dimensions` list (as described
+Its parameterization **must** define a `dimensions` list (as described
 previous for `matrix` type snapshots).
 
 How data is passed into an input node from the outside world is implementation
@@ -166,7 +166,7 @@ defined.
 
 The `output` operation is used to transfer information to the outside world.
 
-It's parameterization **must** define a `dimensions` list (as described
+Its parameterization **must** define a `dimensions` list (as described
 previous for `matrix` type snapshots).
 
 When data is sent to the input of an output node, it should be transferred out
@@ -177,13 +177,13 @@ of the graph to the outside world in an implementation-defined way.
 The `mlplayer` operation is used to describe a single layer in a MLP using
 back-propogation as described by Russel and Norvig.
 
-It's parameterization **must** include the following keys:
+Its parameterization **must** include the following keys:
 
 * `neurons` -- positive integer describing the number of neurons in the layer.
   For the remainder of this section *n* is used to describe the number of
   neurons thus defined.
 
-It's parameterization **may** include the following keys:
+Its parameterization **may** include the following keys:
 
 * `activation` -- a node ID referring to the node which implements the layer's
   activation function. If defined, this **must** be a defined node in the
@@ -197,7 +197,7 @@ number of neurons in the preceding layer. For the remainder of this section,
 
 An `mlplayer` operation **must** have exactly one output, which **must** be a
 one-dimensional matrix which **must** contain a number of values exactly equal
-to it's declared number of neurons.
+to its declared number of neurons.
 
 The following snapshot names **may** be defined for an mlplayer node:
 
@@ -211,11 +211,11 @@ The following snapshot names **may** be defined for an mlplayer node:
 
 **NOTE**: activation functions are accomplished by the relevant separate
 operations. Therefore, the output values from layer pre-activation are
-snapshot-ed as the outputs from the relevant node.
+snapshotted as the outputs from the relevant node.
 
 ### ReLU
 
-The `relu` operation is used to describe a ReLU activation function. It's
+The `relu` operation is used to describe a ReLU activation function. Its
 inputs and outputs are the same dimensions. The *i*-th element of the output is
 the ReLU of the *i*-th input element.
 
@@ -232,7 +232,7 @@ function.
 ## Example
 
 The following example describes an MLP with three hidden layers of size 25, 15,
-and 10. It's input layer has a size of 25, and it's output layer a size of 5.
+and 10. Its input layer has a size of 25, and its output layer has a size of 5.
 
 ```json
 {
