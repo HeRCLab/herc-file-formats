@@ -91,9 +91,29 @@ representative of the internal state of the memories on the FPGA at a given
 instant in time.
 
 A TNX parameterization is a table where keys are node IDs (which **must** be
-valid node IDs occurring within the topology definition), and values are
-arbitrary JSON objects. The parameterization of a node is specific to its
-operation.
+valid node IDs occurring within the topology definition), are tables, which may
+have any of the keys listed below. If a key is present, it **must** conform to
+it's description in this list. Operations **may** require that specific
+parameters be defined for their corresponding node. Users **may** define custom
+keys, but **should** prefix them with `x:` to avoid name collision. It is
+guaranteed that the TNX spec will never explicitly define a key prefixed with
+the characters `x:`.
+
+Specific operations **may** interpret defined parameters in arbitrary ways, so
+long as they adhere to the schema described here. For example, a parameter
+which is a list of floats need not be used by all operations for its suggested
+use case, so long as it is a valid list of floats.
+
+* `dimensions` -- list of 1 or more integers, defining the dimensions of a
+  matrix.
+* `deltas` -- list of floating point values (intended for describing
+  back-propagation delta values).
+* `weights` -- list of floating point values (intended for describing layer
+  weights).
+* `biases` -- list of floating point values (intended for describing layer
+  biases).
+* `activation` -- string (intended for referencing a node ID, to declare it
+  the activation function for an MLP layer).
 
 ## Snapshot Definition
 
@@ -245,72 +265,48 @@ and 10. Its input layer has a size of 25, and its output layer has a size of 5.
       {
         "id": "input",
         "operation": "output",
-        "outputs": "input->output0"
+        "outputs": [ "input->output0" ]
       },
       {
         "id": "hidden1",
         "operation": "mlplayer",
-        "inputs": [
-          "hidden1<-input0"
-        ],
-        "outputs": [
-          "hidden1->output0"
-        ]
+        "inputs": [ "hidden1<-input0" ],
+        "outputs": [ "hidden1->output0" ]
       },
       {
         "id": "activaton1",
         "operation": "relu",
-        "inputs": [
-          "activation1<-input0"
-        ],
-        "outputs": [
-          "activation1->output0"
-        ]
+        "inputs": [ "activation1<-input0" ],
+        "outputs": [ "activation1->output0" ]
       },
       {
         "id": "hidden2",
         "operation": "mlplayer",
-        "inputs": [
-          "hidden2<-input0"
-        ],
-        "outputs": [
-          "hidden2->output0"
-        ]
+        "inputs": [ "hidden2<-input0" ],
+        "outputs": [ "hidden2->output0" ]
       },
       {
         "id": "activaton2",
         "operation": "relu",
-        "inputs": [
-          "activation2<-input0"
-        ],
-        "outputs": [
-          "activation2->output0"
-        ]
+        "inputs": [ "activation2<-input0" ],
+        "outputs": [ "activation2->output0" ]
       },
       {
         "id": "hidden3",
         "operation": "mlplayer",
-        "inputs": [
-          "hidden3<-input0"
-        ],
-        "outputs": [
-          "hidden3->output0"
-        ]
+        "inputs": [ "hidden3<-input0" ],
+        "outputs": [ "hidden3->output0" ]
       },
       {
         "id": "activaton3",
         "operation": "relu",
-        "input": [
-          "activation3<-input0"
-        ],
-        "outputs": [
-          "activation3->output0"
-        ]
+        "input": [ "activation3<-input0" ],
+        "outputs": [ "activation3->output0" ]
       },
       {
         "id": "output",
         "operation": "output",
-        "inputs": "output<-input0"
+        "inputs": [ "output<-input0" ]
       }
     ],
     "links": [
