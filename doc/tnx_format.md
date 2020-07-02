@@ -91,11 +91,11 @@ representative of the internal state of the memories on the FPGA at a given
 instant in time.
 
 A TNX parameterization is a table where keys are node IDs (which **must** be
-valid node IDs occurring within the topology definition), are tables, which may
-have any of the keys listed below. If a key is present, it **must** conform to
-it's description in this list. Operations **may** require that specific
+valid node IDs occurring within the topology definition), and values are tables,
+which may have any of the keys listed below. If a key is present, it **must** 
+conform to its description in this list. Operations **may** require that specific
 parameters be defined for their corresponding node. Users **may** define custom
-keys, but **should** prefix them with `x:` to avoid name collision. It is
+keys, but **should** prefix them with `x:` to avoid name collisions. It is
 guaranteed that the TNX spec will never explicitly define a key prefixed with
 the characters `x:`.
 
