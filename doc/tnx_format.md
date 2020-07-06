@@ -91,13 +91,13 @@ representative of the internal state of the memories on the FPGA at a given
 instant in time.
 
 A TNX parameterization is a table where keys are node IDs (which **must** be
-valid node IDs occurring within the topology definition), and values are tables,
-which may have any of the keys listed below. If a key is present, it **must** 
-conform to its description in this list. Operations **may** require that specific
-parameters be defined for their corresponding node. Users **may** define custom
-keys, but **should** prefix them with `x:` to avoid name collisions. It is
-guaranteed that the TNX spec will never explicitly define a key prefixed with
-the characters `x:`.
+valid node IDs occurring within the topology definition), and values are
+tables, which **may** have any of the keys listed below. If a key is present,
+it **must** conform to its description in this list. Operations **may** require
+that specific parameters be defined for their corresponding node. Users **may**
+define custom keys, but **should** prefix them with `x:` to avoid name
+collisions. It is guaranteed that the TNX spec will never explicitly define a
+key prefixed with the characters `x:`.
 
 Specific operations **may** interpret defined parameters in arbitrary ways, so
 long as they adhere to the schema described here. For example, a parameter
@@ -122,18 +122,21 @@ at some particular time. Because snapshots are intended to be arbitrary
 state-storage mechanisms, the content of each snapshot item will vary according
 to what type of node it pertains to.
 
-A TNX snapshot definition is a list of JSON objects, each of which may be of
-one of several types. All such objects **must** have a `type` field identifying
-its type.  Other fields are specific to each type.
+A TNX snapshot definition is a table of JSON objects, where the keys of the
+table are node IDs (which **must** be valid node IDs occurring within the
+topology definition), and the value a table, which **may** have any of the keys
+listed below. If a specified key is present, it **must** conform to it's
+description in this list. The interpretation of this data is
+implementation-defined. Users **may** define custom keys, but **should** prefix
+them with `x:` to avoid name collisions. It is guaranteed that the TNX spec
+will never explicitly define a key prefixed with the character `x:`.
 
-The following `type` values are allowed:
+The following keys are allowed:
 
-* `matrix`
+* `matrix` -- value **must** be a matrix object as defined below.
 
 A matrix object **must** have the following keys:
 
-* `id` -- an ID which **must** reference a node, node input, or node output
-  defined in the topology section.
 * `name` -- a string definition the meaning of this matrix within the context
   of the node's operation operation.
 * `dimensions` -- a list of integers describing the size of the matrix. The
