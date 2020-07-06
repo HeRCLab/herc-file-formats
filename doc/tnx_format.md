@@ -123,10 +123,10 @@ state-storage mechanisms, the content of each snapshot item will vary according
 to what type of node it pertains to.
 
 A TNX snapshot definition is a table of JSON objects, where the keys of the
-table are node IDs (which **must** be valid node IDs occurring within the
-topology definition), and the value a table, which **may** have any of the keys
-listed below. If a specified key is present, it **must** conform to it's
-description in this list. The interpretation of this data is
+table are node IDs (which **must** be valid node, input, or output  IDs
+occurring within the topology definition), and the value a table, which **may**
+have any of the keys listed below. If a specified key is present, it **must**
+conform to it's description in this list. The interpretation of this data is
 implementation-defined. Users **may** define custom keys, but **should** prefix
 them with `x:` to avoid name collisions. It is guaranteed that the TNX spec
 will never explicitly define a key prefixed with the character `x:`.
