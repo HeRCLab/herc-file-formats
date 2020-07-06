@@ -133,12 +133,14 @@ will never explicitly define a key prefixed with the character `x:`.
 
 The following keys are allowed:
 
-* `matrix` -- value **must** be a matrix object as defined below.
+* `matrix` -- value **must** be a table with keys being matrix names, and
+  values being matrix object as defined below.
+    * The matrix name is used to differentiate multiple matrices associated
+      with the same node from one another. it's meaning is defined by the
+      corresponding node's operation.
 
 A matrix object **must** have the following keys:
 
-* `name` -- a string definition the meaning of this matrix within the context
-  of the node's operation operation.
 * `dimensions` -- a list of integers describing the size of the matrix. The
   length of the list is equal to the number of dimensions.
 * `data` -- a list of floating-point values describing the matrix's contents.
@@ -167,9 +169,9 @@ experimentation and development purposes.
 
 All node inputs and outputs are snapshotted using the `matrix` type. Such
 snapshots **must** refer to the input or output ID (rather than the ID of the
-node itself). The matrix `name` field is not relevant in this context. When an
-operation describes the dimensions of its inputs or outputs, the relevant
-snapshots, if any, **must** use the same dimensions.
+node itself). The matrix name for inputs should be `input`, and should be
+`output` for outputs.. When an operation describes the dimensions of its inputs
+or outputs, the relevant snapshots, if any, **must** use the same dimensions.
 
 There are two special-case operations, used to pass input into and out of the
 graph.
@@ -222,7 +224,7 @@ An `mlplayer` operation **must** have exactly one output, which **must** be a
 one-dimensional matrix which **must** contain a number of values exactly equal
 to its declared number of neurons.
 
-The following snapshot names **may** be defined for an mlplayer node:
+The following matrix names **may** be defined for an mlplayer node snapshot:
 
 * `deltas` -- a matrix consisting of a vector of length *n* describing the
   back-propagation delta values for the node.
