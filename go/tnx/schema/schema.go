@@ -93,7 +93,7 @@ type Matrix struct {
 
 // Snapshot represents a single snapshot object as described in tnx(4)
 type Snapshot struct {
-	Matrix *Matrix `json: matrix`
+	Matrix map[string]*Matrix `json: matrix`
 }
 
 // FromJSON de-serializes a TNX object from a JSON file. The TNX returned

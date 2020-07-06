@@ -210,9 +210,11 @@ func TestFromJSONSnapshot(t *testing.T) {
 	"snapshots": {
 		"foo->output0": {
 			"matrix": {
-				"name": "",
-				"dimensions": [10, 10],
-				"data": [1.0, 2.0, 3.5]
+				"output": {
+					"name": "",
+					"dimensions": [10, 10],
+					"data": [1.0, 2.0, 3.5]
+				}
 			}
 		}
 	}
@@ -257,10 +259,12 @@ func TestFromJSONSnapshot(t *testing.T) {
 		},
 		Snapshots: map[string]*Snapshot{
 			"foo->output0": &Snapshot{
-				Matrix: &Matrix{
-					Dimensions: []int{10, 10},
-					Name:       "",
-					Data:       []float64{1.0, 2.0, 3.5},
+				Matrix: map[string]*Matrix{
+					"output": &Matrix{
+						Dimensions: []int{10, 10},
+						Name:       "",
+						Data:       []float64{1.0, 2.0, 3.5},
+					},
 				},
 			},
 		},
