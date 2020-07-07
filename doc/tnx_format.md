@@ -321,23 +321,23 @@ and 10. Its input layer has a size of 25, and its output layer has a size of 5.
       },
       {
         "source": "hidden1->output0",
-        "target": "activation1->input0"
+        "target": "activation1<-input0"
       },
       {
         "source": "activation1->output0",
-        "target": "hidden2->input0"
+        "target": "hidden2<-input0"
       },
       {
         "source": "hidden2->output0",
-        "target": "activation2->input0"
+        "target": "activation2<-input0"
       },
       {
         "source": "activation2->output0",
-        "target": "hidden3->input0"
+        "target": "hidden3<-input0"
       },
       {
         "source": "hidden3->output0",
-        "target": "activation3->input0"
+        "target": "activation3<-input0"
       },
       {
         "source": "activation3->output0",
