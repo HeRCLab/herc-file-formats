@@ -21,7 +21,28 @@ var SnapshotValidators []func(*TNX, *Snapshot) error
 // Validate checks if the TNX is valid. In order for it to have been loaded by
 // the JSON decoder, it must have been well formed. T
 func Validate(tnx *TNX) error {
+	err := ValidateSchema(tnx.Schema)
+	if err != nil {
+		return err
+	}
+
+	err = ValidateTopology(tnx.Topology)
+	if err != nil {
+		return err
+	}
+
+	err = ValidateParameters(tnx.Parameters)
+	if err != nil {
+		return err
+	}
+
+	err = ValidateSnapshots(tnx.Snapshots)
+	if err != nil {
+		return err
+	}
+
 	return nil
+
 }
 
 // ValidateSchema ensures that the TNX schema is supported by this
@@ -89,5 +110,15 @@ func ValidateTopology(t Topology) error {
 		}
 	}
 
+	return nil
+}
+
+// Validate Parameters ensures that all parameters are valid
+func ValidateParameters(p map[string]*Parameter) error {
+	return nil
+}
+
+// Validate Snapshots ensures that all snapshots are valid
+func ValidateSnapshots(s map[string]*Snapshot) error {
 	return nil
 }
