@@ -28,7 +28,7 @@ func TestFromJSONTopology(t *testing.T) {
 
 	text := `
 {
-	"schema": ["tnx", 0],
+	"schema": ["tnx", "0"],
 	"topology": {
 		"nodes": [
 			{
@@ -55,6 +55,7 @@ func TestFromJSONTopology(t *testing.T) {
 	}
 
 	expect := &TNX{
+		Schema: []string{"tnx", "0"},
 		Topology: Topology{
 			Nodes: []Node{
 				Node{
@@ -94,7 +95,7 @@ func TestFromJSONParameters(t *testing.T) {
 
 	text := `
 {
-	"schema": ["tnx", 0],
+	"schema": ["tnx", "0"],
 	"topology": {
 		"nodes": [
 			{
@@ -130,6 +131,7 @@ func TestFromJSONParameters(t *testing.T) {
 	}
 
 	expect := &TNX{
+		Schema: []string{"tnx", "0"},
 		Topology: Topology{
 			Nodes: []Node{
 				Node{
@@ -180,7 +182,7 @@ func TestFromJSONSnapshot(t *testing.T) {
 
 	text := `
 {
-	"schema": ["tnx", 0],
+	"schema": ["tnx", "0"],
 	"topology": {
 		"nodes": [
 			{
@@ -227,6 +229,7 @@ func TestFromJSONSnapshot(t *testing.T) {
 	}
 
 	expect := &TNX{
+		Schema: []string{"tnx", "0"},
 		Topology: Topology{
 			Nodes: []Node{
 				Node{

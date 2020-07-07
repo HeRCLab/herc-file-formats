@@ -1,5 +1,16 @@
 // Package schema implements the TNX schema as described in tnx(4).
+//
+// The approach used here is a little inflexible, since it relies on all
+// possible key types to be defined as appropriate Go structures. This
+// is useful because it makes the structures easier to implement, but in the
+// future this will probably need to change, since users of this library may
+// wish to register their own key types or validation logic.
 package schema
+
+// This file defines the relevant data structures to represent a TNX file from
+// disk. If you are looking for the"rehydrated" representation of a TNX file,
+// you should go to the parent package. If you are looking for validation
+// related code, see ./validation.go
 
 import (
 	"encoding/json"
@@ -23,6 +34,9 @@ type TNX struct {
 
 	// Snapshots defines a snapshots table as described in tnx(4)
 	Snapshots map[string]*Snapshot `json: snapshots`
+
+	// Schema is used to record the schema and version of the TNX.
+	Schema []string `json: schema`
 }
 
 // Topology represents a TNX topology object.
