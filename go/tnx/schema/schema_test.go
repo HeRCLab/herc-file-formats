@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 
 	"github.com/kr/pretty"
 )
@@ -21,7 +22,7 @@ func compareJSON(s1, s2 string) (bool, error) {
 		return false, err
 	}
 
-	return cmp.Equal(i1, i2), nil
+	return cmp.Equal(i1, i2, cmpopts.IgnoreUnexported(TNX{})), nil
 }
 
 func TestFromJSONTopology(t *testing.T) {
@@ -82,7 +83,7 @@ func TestFromJSONTopology(t *testing.T) {
 
 	t.Logf(pretty.Sprintf("Actual decoded TNX: %#v\n", tnx))
 	t.Logf(pretty.Sprintf("Expected: %#v\n", expect))
-	if !cmp.Equal(tnx, expect) {
+	if !cmp.Equal(tnx, expect, cmpopts.IgnoreUnexported(TNX{})) {
 		t.Errorf("Actual and expected TNX values differ")
 		t.Logf("\n\nDifferences: \n\n")
 		for _, v := range pretty.Diff(tnx, expect) {
@@ -169,7 +170,7 @@ func TestFromJSONParameters(t *testing.T) {
 
 	t.Logf(pretty.Sprintf("Actual decoded TNX: %#v\n", tnx))
 	t.Logf(pretty.Sprintf("Expected: %#v\n", expect))
-	if !cmp.Equal(tnx, expect) {
+	if !cmp.Equal(tnx, expect, cmpopts.IgnoreUnexported(TNX{})) {
 		t.Errorf("Actual and expected TNX values differ")
 		t.Logf("\n\nDifferences: \n\n")
 		for _, v := range pretty.Diff(tnx, expect) {
@@ -278,7 +279,7 @@ func TestFromJSONSnapshot(t *testing.T) {
 
 	t.Logf(pretty.Sprintf("Actual decoded TNX: %#v\n", tnx))
 	t.Logf(pretty.Sprintf("Expected: %#v\n", expect))
-	if !cmp.Equal(tnx, expect) {
+	if !cmp.Equal(tnx, expect, cmpopts.IgnoreUnexported(TNX{})) {
 		t.Errorf("Actual and expected TNX values differ")
 		t.Logf("\n\nDifferences: \n\n")
 		for _, v := range pretty.Diff(tnx, expect) {

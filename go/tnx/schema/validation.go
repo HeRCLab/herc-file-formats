@@ -2,6 +2,7 @@ package schema
 
 import (
 	"fmt"
+	// "github.com/google/go-cmp/cmp"
 )
 
 // ParameterValidators - This list is initialized with the official validation
@@ -12,7 +13,7 @@ import (
 //
 // No function in this list should modify either the parameter, or the TNX.  If
 // the parameter is valid, it should return nil, and otherwise an error.
-var ParameterValidators []func(*TNX, *Parameter) error
+var ParameterValidators []func(*TNX, *Parameter, string) error
 
 // SnapshotValidators - as with ParameterValidators, but instead applies to
 // snapshot objects.
@@ -31,12 +32,12 @@ func Validate(tnx *TNX) error {
 		return err
 	}
 
-	err = ValidateParameters(tnx.Parameters)
+	err = ValidateParameters(tnx)
 	if err != nil {
 		return err
 	}
 
-	err = ValidateSnapshots(tnx.Snapshots)
+	err = ValidateSnapshots(tnx)
 	if err != nil {
 		return err
 	}
@@ -114,11 +115,102 @@ func ValidateTopology(t Topology) error {
 }
 
 // Validate Parameters ensures that all parameters are valid
-func ValidateParameters(p map[string]*Parameter) error {
+func ValidateParameters(tnx *TNX) error {
+	for id, param := range tnx.Parameters {
+		for _, v := range ParameterValidators {
+			err := v(tnx, param, id)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
+// Validator for input and output node parameters
+func init() {
+	ParameterValidators = append(ParameterValidators, func(tnx *TNX, param *Parameter, id string) error {
+		node, err := tnx.lookupNodeByID(id)
+		if err != nil {
+			return fmt.Errorf("Parameter '%v' applies to invalid node ID '%s', error was: %v",
+				param, id, err)
+		}
+
+		if (node.Operation != "input") && (node.Operation != "output") {
+			return nil
+		}
+
+		if param.Dimensions == nil {
+			return fmt.Errorf("Parametrization of node '%s' must define a dimension list", id)
+		}
+
+		// input node can have one output and no inputs
+		if node.Operation == "input" {
+			if len(node.Inputs) > 0 {
+				return fmt.Errorf("Input node '%s' cannot define any inputs", node.ID)
+			}
+
+			if len(node.Outputs) == 0 {
+				return fmt.Errorf("Input node '%s' is redundant, it defines no outputs", node.ID)
+			}
+
+			if len(node.Outputs) > 1 {
+				return fmt.Errorf("Input node '%s' defines multiple outputs", node.ID)
+			}
+		}
+
+		// output node can have one input and no outputs
+		if node.Operation == "output" {
+			if len(node.Outputs) > 0 {
+				return fmt.Errorf("Output node '%s' cannot define any outputs", node.ID)
+			}
+
+			if len(node.Inputs) == 0 {
+				return fmt.Errorf("Output node '%s' is redundant, it defines no inputs", node.ID)
+			}
+
+			if len(node.Inputs) > 1 {
+				return fmt.Errorf("Output node '%s' defines multiple inputs", node.ID)
+			}
+		}
+
+		// calculate link ID as appropriate
+		var linkID string = ""
+		if node.Operation == "input" {
+			linkID = node.Outputs[0]
+		} else /*output*/ {
+			linkID = node.Inputs[0]
+		}
+
+		// make sure the link exists
+		link, err := tnx.lookupLinkByEndpoint(linkID)
+		if err != nil {
+			return fmt.Errorf("Node '%s' I/O '%s' not referenced by any link", id, linkID)
+		}
+
+		// now we can find the node on the other end of the link
+		otherID := link.Source // keep in mind this is the ID of one of the other node's I/Os
+		if otherID == node.ID {
+			otherID = link.Target
+		}
+		other, err := tnx.lookupNodeByIOID(otherID)
+		if err != nil {
+			return fmt.Errorf("Link %v references invalid I/O '%s'", link, otherID)
+		}
+
+		otherParam, ok := tnx.Parameters[other.ID]
+		if !ok {
+			return fmt.Errorf("Node '%s' specifies dimension %v, but connected node '%s' is unparameterized",
+				node.ID, param.Dimensions, other.ID)
+		}
+
+		fmt.Printf("%v", otherParam)
+		return nil
+
+	})
+}
+
 // Validate Snapshots ensures that all snapshots are valid
-func ValidateSnapshots(s map[string]*Snapshot) error {
+func ValidateSnapshots(tnx *TNX) error {
 	return nil
 }

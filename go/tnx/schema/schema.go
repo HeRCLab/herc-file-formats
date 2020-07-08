@@ -37,6 +37,14 @@ type TNX struct {
 
 	// Schema is used to record the schema and version of the TNX.
 	Schema []string `json: schema`
+
+	// These fields are used to cache lookup operations on nodes and links.
+	//
+	// Because they are unexported, the JSON package should ignore them,
+	// but we mark them as ignored anyway to be explicit about it.
+	linkLookupCache   map[string]*Link `json:"-"`
+	nodeIOLookupCache map[string]*Node `json:"-"`
+	nodeLookupCache   map[string]*Node `json:"-"`
 }
 
 // Topology represents a TNX topology object.
