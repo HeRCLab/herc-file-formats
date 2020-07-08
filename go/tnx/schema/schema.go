@@ -42,9 +42,9 @@ type TNX struct {
 	//
 	// Because they are unexported, the JSON package should ignore them,
 	// but we mark them as ignored anyway to be explicit about it.
-	linkLookupCache   map[string]*Link `json:"-"`
-	nodeIOLookupCache map[string]*Node `json:"-"`
-	nodeLookupCache   map[string]*Node `json:"-"`
+	linkLookupCache   map[string][]*Link `json:"-"`
+	nodeIOLookupCache map[string]*Node   `json:"-"`
+	nodeLookupCache   map[string]*Node   `json:"-"`
 }
 
 // Topology represents a TNX topology object.
@@ -99,6 +99,10 @@ type Parameter struct {
 
 	// Activation represents an activation reference as described in tnx(4)
 	Activation *string `json: activation`
+
+	// Neurons represents the number of neurons in an MLP layer as
+	// described in tnx(4)
+	Neurons *int `json: neurons`
 }
 
 // Matrix represents a matrix type snapshot value, as described in tnx(4)

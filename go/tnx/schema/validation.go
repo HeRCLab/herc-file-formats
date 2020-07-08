@@ -114,7 +114,7 @@ func ValidateTopology(t Topology) error {
 	return nil
 }
 
-// Validate Parameters ensures that all parameters are valid
+// ValidateParameters ensures that all parameters are valid
 func ValidateParameters(tnx *TNX) error {
 	for id, param := range tnx.Parameters {
 		for _, v := range ParameterValidators {
@@ -127,10 +127,62 @@ func ValidateParameters(tnx *TNX) error {
 	return nil
 }
 
+// GetEffectiveDimensions retrieves the dimensions list for a given input
+// or output, based on the parameterization of the relevant node.
+func (tnx *TNX) GetEffectiveDimensions(ioid string) (*[]int, error) {
+	node, err := tnx.LookupNodeByIOID(ioid)
+	if err != nil {
+		return nil, err
+	}
+
+	param, err := tnx.GetParameters(node.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	if (node.Operation == "input") || (node.Operation == "output") {
+		// Note: assumptions about the inputs and outputs of
+		// input and outputnodes are enforced elsewhere.
+
+		if param.Dimensions == nil {
+			return nil, fmt.Errorf("Node ID '%s' omits it's dimension parameter", node.ID)
+		}
+		return param.Dimensions, nil
+
+	} else if node.Operation == "mlplayer" {
+		if param.Neurons == nil {
+			return nil, fmt.Errorf("Node ID '%s' omits it's neurons parameter", node.ID)
+		}
+
+		if tnx.IsInput(ioid) {
+
+		}
+	}
+
+	// TODO
+
+	return nil, nil
+}
+
+// GetParameters retrieves the parameters for a given node by it's ID.
+func (tnx *TNX) GetParameters(nodeID string) (*Parameter, error) {
+	node, err := tnx.LookupNodeByID(nodeID)
+	if err != nil {
+		return nil, err
+	}
+
+	param, ok := tnx.Parameters[node.ID]
+	if !ok {
+		return nil, fmt.Errorf("No parameters found for node '%s'", node.ID)
+	}
+
+	return param, nil
+}
+
 // Validator for input and output node parameters
 func init() {
 	ParameterValidators = append(ParameterValidators, func(tnx *TNX, param *Parameter, id string) error {
-		node, err := tnx.lookupNodeByID(id)
+		node, err := tnx.LookupNodeByID(id)
 		if err != nil {
 			return fmt.Errorf("Parameter '%v' applies to invalid node ID '%s', error was: %v",
 				param, id, err)
@@ -183,31 +235,38 @@ func init() {
 		}
 
 		// make sure the link exists
-		link, err := tnx.lookupLinkByEndpoint(linkID)
+		links, err := tnx.LookupLinkByEndpoint(linkID)
 		if err != nil {
 			return fmt.Errorf("Node '%s' I/O '%s' not referenced by any link", id, linkID)
 		}
 
-		// now we can find the node on the other end of the link
-		otherID := link.Source // keep in mind this is the ID of one of the other node's I/Os
-		if otherID == node.ID {
-			otherID = link.Target
-		}
-		other, err := tnx.lookupNodeByIOID(otherID)
-		if err != nil {
-			return fmt.Errorf("Link %v references invalid I/O '%s'", link, otherID)
+		// TODO
+		for _, link := range links {
+			// now we can find the node on the other end of the link
+			otherID := link.Source // keep in mind this is the ID of one of the other node's I/Os
+			if otherID == node.ID {
+				otherID = link.Target
+			}
+			other, err := tnx.LookupNodeByIOID(otherID)
+			if err != nil {
+				return fmt.Errorf("Link %v references invalid I/O '%s'", link, otherID)
+			}
+
+			otherParam, ok := tnx.Parameters[other.ID]
+			if !ok {
+				return fmt.Errorf("Node '%s' specifies dimension %v, but connected node '%s' is unparameterized",
+					node.ID, param.Dimensions, other.ID)
+			}
+
+			fmt.Printf("%v", otherParam)
+			return nil
 		}
 
-		otherParam, ok := tnx.Parameters[other.ID]
-		if !ok {
-			return fmt.Errorf("Node '%s' specifies dimension %v, but connected node '%s' is unparameterized",
-				node.ID, param.Dimensions, other.ID)
-		}
-
-		fmt.Printf("%v", otherParam)
+		// TODO
 		return nil
 
 	})
+
 }
 
 // Validate Snapshots ensures that all snapshots are valid
