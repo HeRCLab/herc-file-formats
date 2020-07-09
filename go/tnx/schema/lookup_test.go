@@ -1,9 +1,12 @@
 package schema
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/herclab/tnx/go/tnx/schema/samples"
 )
 
 func TestLookupNodeByID(t *testing.T) {
@@ -137,65 +140,62 @@ func TestLookupNodeByIOID(t *testing.T) {
 }
 
 func TestLookupLinkByEndpoint(t *testing.T) {
-	tnx := &TNX{
-		Schema: []string{"tnx", "0"},
-		Topology: Topology{
-			Nodes: []Node{
-				Node{
-					ID:        "foo",
-					Operation: "input",
-					Inputs:    nil,
-					Outputs:   []string{"foo->output0"},
-				},
-				Node{
-					ID:        "bar",
-					Operation: "output",
-					Inputs:    []string{"bar<-input0"},
-					Outputs:   nil,
-				},
-			},
-			Links: []Link{
-				Link{
-					Source: "foo->output0",
-					Target: "bar<-input0",
-				},
-			},
-		},
+	tnx, err := FromJSON(samples.SampleMLP3Layer())
+	if err != nil {
+		t.Error(err)
 	}
 
-	l1, err := tnx.LookupLinkByEndpoint("foo->output0")
-	if (err != nil) || cmp.Equal(l1, []*Link{}) {
-		t.Errorf("Should not have failed to lookup foo->output0")
-	}
-	t.Logf("l1: %v", l1)
-
-	l2, err := tnx.LookupLinkByEndpoint("foo->output0")
-	if (err != nil) || cmp.Equal(l2, []*Link{}) {
-		t.Errorf("Should not have failed to lookup foo->output0")
-	}
-	t.Logf("l2: %v", l2)
-
-	l3, err := tnx.LookupLinkByEndpoint("bar<-input0")
-	if (err != nil) || cmp.Equal(l3, []*Link{}) {
-		t.Errorf("Should not have failed to lookup bar<-input0")
-	}
-	t.Logf("l3: %v", l3)
-
-	l4, err := tnx.LookupLinkByEndpoint("bar<-input0")
-	if (err != nil) || cmp.Equal(l4, []*Link{}) {
-		t.Errorf("Should not have failed to lookup bar<-input0")
-	}
-	t.Logf("l4: %v", l4)
-
-	if !cmp.Equal(l1, l2) || !cmp.Equal(l2, l3) || !cmp.Equal(l3, l4) {
-		t.Errorf("Looking up the link should not return different results")
+	cases := []struct {
+		id     string
+		expect []*Link
+	}{
+		{"input->output0", []*Link{&Link{Source: "input->output0", Target: "hidden1<-input0"}}},
+		{"hidden1<-input0", []*Link{&Link{Source: "input->output0", Target: "hidden1<-input0"}}},
+		{"hidden1->output0", []*Link{&Link{Source: "hidden1->output0", Target: "activation1->input0"}}},
+		{"activation1<-input0", []*Link{&Link{Source: "hidden1->output0", Target: "activation1<-input0"}}},
 	}
 
-	l5, err := tnx.LookupLinkByEndpoint("foo")
-	t.Logf("l5: %v", l5)
-	if !cmp.Equal(l5, []*Link{}) {
-		t.Errorf("Should not be able to look up link by node ID using lookupLinkByEndpoint")
+	for n, c := range cases {
+		actual, err := tnx.LookupLinkByEndpoint(c.id)
+		t.Logf("Case %d, IOID '%s':", n, c.id)
+		if err != nil {
+			t.Errorf("\tUnexpected error: %v", err)
+			continue
+		}
+
+		// we sort everything, to guarantee that it will be safe
+		// to in-order compare the actual and expected values.
+
+		sort.Slice(actual, func(i, j int) bool {
+			return actual[i].Source < actual[j].Source
+		})
+
+		sort.Slice(actual, func(i, j int) bool {
+			return actual[i].Target < actual[j].Target
+		})
+
+		sort.Slice(c.expect, func(i, j int) bool {
+			return c.expect[i].Source < c.expect[j].Source
+		})
+
+		sort.Slice(c.expect, func(i, j int) bool {
+			return c.expect[i].Target < c.expect[j].Target
+		})
+
+		t.Logf("\tactual:")
+		for _, v := range actual {
+			t.Logf("\t\t%v\n", v)
+		}
+		t.Logf("\texpect:")
+		for _, v := range c.expect {
+			t.Logf("\t\t%v\n", v)
+		}
+
+		if !cmp.Equal(actual, c.expect) {
+			t.Errorf("\tactual and expected values do not match")
+		}
 	}
+
 }
 
 func TestCheckingIDType(t *testing.T) {

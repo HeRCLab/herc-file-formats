@@ -155,13 +155,43 @@ func (tnx *TNX) GetEffectiveDimensions(ioid string) (*[]int, error) {
 		}
 
 		if tnx.IsInput(ioid) {
+			links, err := tnx.LookupLinkByEndpoint(ioid)
+			if err != nil {
+				return nil, err
+			}
 
+			if len(links) < 1 {
+				return nil, fmt.Errorf("Input IO '%s' is unconnected, cannot compute effective dimensions", ioid)
+			} else if len(links) > 1 {
+				return nil, fmt.Errorf("Input IO '%s' has multiple sources, invalid topology", ioid)
+			}
+
+			link := links[0]
+
+			// NOTE: we assume that we are the Target, because
+			// this will always be true in a valid TNX file.
+			prevnode, err := tnx.LookupNodeByIOID(link.Source)
+			if err != nil {
+				return nil, err
+			}
+
+			return tnx.GetEffectiveDimensions(prevnode.ID)
+
+		} else if tnx.IsOutput(ioid) {
+			if param.Neurons == nil {
+				return nil, fmt.Errorf("Node ID '%s' omits it's neurons parameter", node.ID)
+			}
+
+			return &[]int{*param.Neurons}, nil
+
+		} else {
+
+			return nil, fmt.Errorf("IOID '%s' does not refer to an input or an output", ioid)
 		}
+
 	}
 
-	// TODO
-
-	return nil, nil
+	return nil, fmt.Errorf("IOID '%s' implements an unknown operation '%s'", ioid, node.Operation)
 }
 
 // GetParameters retrieves the parameters for a given node by it's ID.

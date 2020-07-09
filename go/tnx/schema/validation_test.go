@@ -2,6 +2,10 @@ package schema
 
 import (
 	"testing"
+
+	"github.com/herclab/tnx/go/tnx/schema/samples"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestValidateSchema(t *testing.T) {
@@ -266,6 +270,51 @@ func TestValidateTopology(t *testing.T) {
 		if !v.err && res != nil {
 			t.Errorf("\tTopology should not have errored but did")
 			t.Errorf("\tTopology should have errored but did not")
+		}
+
+	}
+}
+
+func TestGetEffectiveDimensions(t *testing.T) {
+	tnx, err := FromJSON(samples.SampleMLP3Layer())
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	cases := []struct {
+		id        string
+		dim       *[]int
+		shoulderr bool
+	}{
+		{"foo", nil, true},
+		{"input->output0", &[]int{25}, false},
+		{"hidden1<-input0", &[]int{25}, false},
+		{"hidden1->output0", &[]int{25}, false},
+	}
+
+	for n, c := range cases {
+		actual, err := tnx.GetEffectiveDimensions(c.id)
+
+		t.Logf("Test case %d, IOID '%s':", n, c.id)
+
+		if c.shoulderr {
+			if err == nil {
+				t.Errorf("\tshould have error-ed and did not")
+			}
+			continue
+		}
+
+		if err != nil {
+			t.Errorf("\tunexpected error %v", err)
+			continue
+		}
+
+		t.Logf("\texpected dimensions: %v", *c.dim)
+		t.Logf("\tactual dimensions: %v", *actual)
+
+		if !cmp.Equal(actual, c.dim) {
+			t.Errorf("\tactual and expected dimensions did not match")
 		}
 
 	}
