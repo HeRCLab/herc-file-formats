@@ -2,6 +2,13 @@
 
 *Trivial Neural network eXchange*
 
+**On Hiatus**: this project is tabled for the time being, as it's scope has
+become rather large. The decision reached on July 20, 2020 was to leave this
+project be for the present time, and instead build more application-specific
+file formats, such as [mlpx](https://github.com/HeRCLab/mlpx). Later with the
+benefit of hindsight, we can re-open this project when it's intented objectives
+become more directly necessary for our use cases.
+
 **WiP**: this repo does not contain any working code yet. The proposed format
 can be found in [`./doc`](./doc).
 
