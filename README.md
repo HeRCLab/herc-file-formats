@@ -16,7 +16,7 @@ language. So for example, a C implementation of TNX might reside in `./tnx/c/`.
 ## File Formats
 
 | Format | Current Version | Status | Provenance | Purpose |
-|-|-|-|-|
+|-|-|-|-|-|
 | [TNX (Trivial Network eXchange)](./tnx) | unreleased | on-hold | Bespoke | Format for representing compute graphs, with a focus on neurual networks. |
 | [MLPX (MLP eXchange)](./mlpx) | unreleased | in-progress | Bespoke | Portable format for checkpointing MLP networks. |
 
