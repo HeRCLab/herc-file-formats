@@ -39,10 +39,22 @@ func getTestJSON1() string {
 
 func getTestMLPX1() *MLPX {
 	m := MakeMLPX()
-	m.MakeSnapshot("0")
-	m.Snapshots["0"].MakeLayer("input", 2, "", "hidden0")
-	m.Snapshots["0"].MakeLayer("hidden0", 2, "input", "output")
-	m.Snapshots["0"].MakeLayer("output", 2, "hidden0", "")
+	err := m.MakeSnapshot("0")
+	if err != nil {
+		panic(err)
+	}
+	err = m.Snapshots["0"].MakeLayer("input", 2, "", "hidden0")
+	if err != nil {
+		panic(err)
+	}
+	err = m.Snapshots["0"].MakeLayer("hidden0", 2, "input", "output")
+	if err != nil {
+		panic(err)
+	}
+	err = m.Snapshots["0"].MakeLayer("output", 2, "hidden0", "")
+	if err != nil {
+		panic(err)
+	}
 
 	m.Snapshots["0"].Layers["hidden0"].Weights = &[]float64{1.5, 2.5, 3.5, 4}
 	m.Snapshots["0"].Layers["output"].Outputs = &[]float64{0.5, 1.4}
@@ -94,8 +106,12 @@ func TestMakeIsomorphicSnapshot(t *testing.T) {
 
 	// this should result in a valid MLPX, and we have already verified
 	// that the MLPX validation logic is correct in a separate test.
-	m.MakeIsomorphicSnapshot("1", "0")
-	err := m.Validate()
+	err := m.MakeIsomorphicSnapshot("1", "0")
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = m.Validate()
 	if err != nil {
 		t.Error(err)
 	}

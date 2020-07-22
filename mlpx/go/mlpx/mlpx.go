@@ -67,14 +67,20 @@ func (mlp *MLPX) MakeSnapshot(id string) error {
 // snapshots, once the first has been defined, to guarantee that all snapshots
 // are isomorphic, which the spec requires.
 func (mlp *MLPX) MakeIsomorphicSnapshot(id, to string) error {
-	mlp.MakeSnapshot(id)
+	err := mlp.MakeSnapshot(id)
+	if err != nil {
+		return err
+	}
 
 	if _, ok := mlp.Snapshots[to]; !ok {
 		return fmt.Errorf("Specified snapshot '%s' does not exist", to)
 	}
 
 	for layerid, layer := range mlp.Snapshots[to].Layers {
-		mlp.Snapshots[id].MakeLayer(layerid, layer.Neurons, layer.Predecessor, layer.Successor)
+		err := mlp.Snapshots[id].MakeLayer(layerid, layer.Neurons, layer.Predecessor, layer.Successor)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

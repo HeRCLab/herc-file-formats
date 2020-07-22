@@ -86,9 +86,18 @@ func TestValidate(t *testing.T) {
 
 	// test non-isomorphic snapshots -- different lengths of snapshot lists
 	// case
-	m1.MakeSnapshot("1")
-	m1.Snapshots["1"].MakeLayer("input", 2, "", "output")
-	m1.Snapshots["1"].MakeLayer("output", 2, "input", "")
+	err = m1.MakeSnapshot("1")
+	if err != nil {
+		t.Error(err)
+	}
+	err = m1.Snapshots["1"].MakeLayer("input", 2, "", "output")
+	if err != nil {
+		t.Error(err)
+	}
+	err = m1.Snapshots["1"].MakeLayer("output", 2, "input", "")
+	if err != nil {
+		t.Error(err)
+	}
 	err = m1.Validate()
 	if err == nil {
 		t.Errorf("Should have error-ed with non-isomorphic layers")
@@ -96,7 +105,10 @@ func TestValidate(t *testing.T) {
 
 	// make sure we can detect mismatched neuron counts
 	delete(m1.Snapshots, "1")
-	m1.MakeIsomorphicSnapshot("1", "0")
+	err = m1.MakeIsomorphicSnapshot("1", "0")
+	if err != nil {
+		t.Error(err)
+	}
 	m1.Snapshots["1"].Layers["hidden0"].Neurons = 5
 	err = m1.Validate()
 	if err == nil {

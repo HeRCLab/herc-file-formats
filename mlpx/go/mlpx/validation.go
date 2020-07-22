@@ -9,19 +9,19 @@ func (mlp *MLPX) validateReferences() error {
 
 	for snapid, snapshot := range mlp.Snapshots {
 		if snapid != snapshot.ID {
-			return fmt.Errorf("Snapshot '%s': snapshot ID in struct and in MLPX table do not match, your MLPX implementation has a bug! ('%s' =/= '%s')", snapid, snapid, snapshot.ID)
+			return fmt.Errorf("snapshot '%s': snapshot ID in struct and in MLPX table do not match, your MLPX implementation has a bug ('%s' =/= '%s')", snapid, snapid, snapshot.ID)
 		}
 		if snapshot.Parent != mlp {
-			return fmt.Errorf("Snapshot '%s': parent pointer does not reference the parent MLPX object, your MLPX implementation has bugs!", snapid)
+			return fmt.Errorf("snapshot '%s': parent pointer does not reference the parent MLPX object, your MLPX implementation has bugs", snapid)
 		}
 
 		for layerid, layer := range snapshot.Layers {
 			if layer.Parent != snapshot {
-				return fmt.Errorf("Snapshot '%s', layer '%s': parent pointer does not reference the parent snapshot object, your MLPX implementation has bugs!", snapid, layerid)
+				return fmt.Errorf("snapshot '%s', layer '%s': parent pointer does not reference the parent snapshot object, your MLPX implementation has bugs", snapid, layerid)
 			}
 
 			if layerid != layer.ID {
-				return fmt.Errorf("Snapshot '%s', layer '%s': snapshot ID in struct and in MLPX table do not match, your MLPX implementation has a bug! ('%s' =/= '%s')",
+				return fmt.Errorf("snapshot '%s', layer '%s': snapshot ID in struct and in MLPX table do not match, your MLPX implementation has a bug ('%s' =/= '%s')",
 					snapid, layerid, layerid, layer.ID)
 			}
 
@@ -29,7 +29,7 @@ func (mlp *MLPX) validateReferences() error {
 			if layerid != "input" {
 				// input layers don't have predecessors
 				if _, ok := snapshot.Layers[layer.Predecessor]; !ok {
-					return fmt.Errorf("Snapshot '%s', layer '%s': predecessor '%s' references nonexistent layer",
+					return fmt.Errorf("snapshot '%s', layer '%s': predecessor '%s' references nonexistent layer",
 						snapid, layerid, layer.Predecessor)
 				}
 			}
@@ -38,7 +38,7 @@ func (mlp *MLPX) validateReferences() error {
 			if layerid != "output" {
 				// output layers don't have successors
 				if _, ok := snapshot.Layers[layer.Successor]; !ok {
-					return fmt.Errorf("Snapshot '%s', layer '%s': successor '%s' references nonexistent layer",
+					return fmt.Errorf("snapshot '%s', layer '%s': successor '%s' references nonexistent layer",
 						snapid, layerid, layer.Predecessor)
 				}
 			}
@@ -47,7 +47,7 @@ func (mlp *MLPX) validateReferences() error {
 			if layerid != "input" && layer.Weights != nil {
 				expect := layer.Neurons * snapshot.Layers[layer.Predecessor].Neurons
 				if len(*layer.Weights) != expect {
-					return fmt.Errorf("Snapshot '%s', layer '%s': weights array of length %d, should be %d",
+					return fmt.Errorf("snapshot '%s', layer '%s': weights array of length %d, should be %d",
 						snapid, layerid, len(*layer.Weights), expect)
 				}
 			}
@@ -55,7 +55,7 @@ func (mlp *MLPX) validateReferences() error {
 			// verify size of outputs list
 			if layer.Outputs != nil {
 				if len(*layer.Outputs) != layer.Neurons {
-					return fmt.Errorf("Snapshot '%s', layer '%s': output array of length %d, should be %d",
+					return fmt.Errorf("snapshot '%s', layer '%s': output array of length %d, should be %d",
 						snapid, layerid, len(*layer.Outputs), layer.Neurons)
 				}
 			}
@@ -63,7 +63,7 @@ func (mlp *MLPX) validateReferences() error {
 			// verify size of activation list
 			if layer.Activations != nil {
 				if len(*layer.Activations) != layer.Neurons {
-					return fmt.Errorf("Snapshot '%s', layer '%s': activation array of length %d, should be %d",
+					return fmt.Errorf("snapshot '%s', layer '%s': activation array of length %d, should be %d",
 						snapid, layerid, len(*layer.Activations), layer.Neurons)
 				}
 			}
@@ -71,7 +71,7 @@ func (mlp *MLPX) validateReferences() error {
 			// verify size of deltas list
 			if layer.Deltas != nil {
 				if len(*layer.Deltas) != layer.Neurons {
-					return fmt.Errorf("Snapshot '%s', layer '%s': delta array of length %d, should be %d",
+					return fmt.Errorf("snapshot '%s', layer '%s': delta array of length %d, should be %d",
 						snapid, layerid, len(*layer.Deltas), layer.Neurons)
 				}
 			}
@@ -79,7 +79,7 @@ func (mlp *MLPX) validateReferences() error {
 			// verify size of bias list
 			if layer.Biases != nil {
 				if len(*layer.Biases) != layer.Neurons {
-					return fmt.Errorf("Snapshot '%s', layer '%s': bias array of length %d, should be %d",
+					return fmt.Errorf("snapshot '%s', layer '%s': bias array of length %d, should be %d",
 						snapid, layerid, len(*layer.Biases), layer.Neurons)
 				}
 			}
@@ -116,7 +116,7 @@ func (mlp *MLPX) validateIsomorphism() error {
 		// make sure all layers in the key are in the snapshot
 		for layerid := range key.Layers {
 			if _, ok := snapshot.Layers[layerid]; !ok {
-				return fmt.Errorf("Snapshot '%s' and '%s' are not isomorphic, snapshot '%s' has layer ID '%s, but snapshot '%s' does not",
+				return fmt.Errorf("snapshot '%s' and '%s' are not isomorphic, snapshot '%s' has layer ID '%s, but snapshot '%s' does not",
 					keyid, snapid, keyid, layerid, snapid)
 			}
 		}
@@ -124,7 +124,7 @@ func (mlp *MLPX) validateIsomorphism() error {
 		// and the converse
 		for layerid := range snapshot.Layers {
 			if _, ok := key.Layers[layerid]; !ok {
-				return fmt.Errorf("Snapshot '%s' and '%s' are not isomorphic, snapshot '%s' has layer ID '%s, but snapshot '%s' does not",
+				return fmt.Errorf("snapshot '%s' and '%s' are not isomorphic, snapshot '%s' has layer ID '%s, but snapshot '%s' does not",
 					snapid, keyid, snapid, layerid, keyid)
 			}
 		}
@@ -134,7 +134,7 @@ func (mlp *MLPX) validateIsomorphism() error {
 		// are sized in a way appropriate for their neuron counts
 		for layerid, layer := range key.Layers {
 			if layer.Neurons != snapshot.Layers[layerid].Neurons {
-				return fmt.Errorf("Snapshot '%s' and '%s' have different numbers of neurons (%d, and %d respectively) for layer '%s'",
+				return fmt.Errorf("snapshot '%s' and '%s' have different numbers of neurons (%d, and %d respectively) for layer '%s'",
 					keyid, snapid, layer.Neurons, snapshot.Layers[layerid].Neurons, layerid)
 			}
 		}
@@ -167,7 +167,7 @@ func (mlp *MLPX) validateTopology() error {
 			if layerid != "output" { // successor case
 				succpred := snapshot.Layers[layer.Successor].Predecessor
 				if succpred != layerid {
-					return fmt.Errorf("Snapshot '%s', layer '%s': successor layer '%s' has a different predecessor '%s'",
+					return fmt.Errorf("snapshot '%s', layer '%s': successor layer '%s' has a different predecessor '%s'",
 						snapid, layerid, layer.Successor, succpred)
 				}
 			}
@@ -175,7 +175,7 @@ func (mlp *MLPX) validateTopology() error {
 			if layerid != "input" { // predecessor case
 				predsucc := snapshot.Layers[layer.Predecessor].Successor
 				if predsucc != layerid {
-					return fmt.Errorf("Snapshot '%s', layer '%s': predecessor layer '%s' has a different successor '%s'",
+					return fmt.Errorf("snapshot '%s', layer '%s': predecessor layer '%s' has a different successor '%s'",
 						snapid, layerid, layer.Predecessor, predsucc)
 				}
 			}
@@ -192,13 +192,13 @@ func (mlp *MLPX) validateTopology() error {
 		for k, v := range inEdges {
 			if k == "input" {
 				if v != 0 {
-					return fmt.Errorf("Snapshot '%s', layer '%s': has wrong number of in-edges %d (expected 0)",
+					return fmt.Errorf("snapshot '%s', layer '%s': has wrong number of in-edges %d (expected 0)",
 						snapid, k, v)
 				}
 				continue
 			}
 			if v != 1 {
-				return fmt.Errorf("Snapshot '%s', layer '%s': has wrong number of in-edges %d (expected 1)",
+				return fmt.Errorf("snapshot '%s', layer '%s': has wrong number of in-edges %d (expected 1)",
 					snapid, k, v)
 			}
 		}
@@ -206,13 +206,13 @@ func (mlp *MLPX) validateTopology() error {
 		for k, v := range outEdges {
 			if k == "output" {
 				if v != 0 {
-					return fmt.Errorf("Snapshot '%s', layer '%s': has wrong number of out-edges %d (expected 0)",
+					return fmt.Errorf("snapshot '%s', layer '%s': has wrong number of out-edges %d (expected 0)",
 						snapid, k, v)
 				}
 				continue
 			}
 			if v != 1 {
-				return fmt.Errorf("Snapshot '%s', layer '%s': has wrong number of out-edges %d (expected 1)",
+				return fmt.Errorf("snapshot '%s', layer '%s': has wrong number of out-edges %d (expected 1)",
 					snapid, k, v)
 			}
 		}
@@ -231,7 +231,7 @@ func (mlp *MLPX) Validate() error {
 	}
 
 	if version != 0 {
-		return fmt.Errorf("Unknown version number %d", version)
+		return fmt.Errorf("unknown version number %d", version)
 	}
 
 	err = mlp.validateReferences()
