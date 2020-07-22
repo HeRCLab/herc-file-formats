@@ -112,6 +112,10 @@ func (mlp *MLPX) SortedSnapshotIDs() []string {
 			return true
 		}
 
+		if snapids[j] == "initializer" {
+			return false
+		}
+
 		ii, ierr := strconv.Atoi(snapids[i])
 		ji, jerr := strconv.Atoi(snapids[j])
 
