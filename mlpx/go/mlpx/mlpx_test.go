@@ -38,32 +38,14 @@ func getTestJSON1() string {
 }
 
 func getTestMLPX1() *MLPX {
-	m := &MLPX{
-		Schema:    []interface{}{"mlpx", float64(0)},
-		Snapshots: make(map[string]*Snapshot),
-	}
+	m := MakeMLPX()
+	m.MakeSnapshot("0")
+	m.Snapshots["0"].MakeLayer("input", 2, "", "hidden0")
+	m.Snapshots["0"].MakeLayer("hidden0", 2, "input", "output")
+	m.Snapshots["0"].MakeLayer("output", 2, "hidden0", "")
 
-	m.Snapshots["0"] = &Snapshot{
-		Layers: make(map[string]*Layer),
-	}
-
-	m.Snapshots["0"].Layers["input"] = &Layer{
-		Successor: "hidden0",
-		Neurons:   2,
-	}
-
-	m.Snapshots["0"].Layers["hidden0"] = &Layer{
-		Successor:   "output",
-		Predecessor: "input",
-		Neurons:     2,
-		Weights:     &[]float64{1.5, 2.5, 3.5, 4},
-	}
-
-	m.Snapshots["0"].Layers["output"] = &Layer{
-		Predecessor: "hidden0",
-		Neurons:     2,
-		Outputs:     &[]float64{0.5, 1.4},
-	}
+	m.Snapshots["0"].Layers["hidden0"].Weights = &[]float64{1.5, 2.5, 3.5, 4}
+	m.Snapshots["0"].Layers["output"].Outputs = &[]float64{0.5, 1.4}
 
 	return m
 }
@@ -93,6 +75,9 @@ func TestEndcodeDecode(t *testing.T) {
 	}
 
 	m3, err := FromJSON(b1)
+	if err != nil {
+		t.Error(err)
+	}
 
 	t.Logf("m3=%s", pretty.Sprintf("%#v", m3))
 
@@ -201,5 +186,48 @@ func TestValidate(t *testing.T) {
 	err = m1.Validate()
 	if err == nil {
 		t.Errorf("Should have error-ed with non-isomorphic layers")
+	}
+
+	// make sure we can detect mismatched neuron counts
+	delete(m1.Snapshots, "1")
+	m1.MakeIsomorphicSnapshot("1", "0")
+	m1.Snapshots["1"].Layers["hidden0"].Neurons = 5
+	err = m1.Validate()
+	if err == nil {
+		t.Errorf("Should have error-ed with isomorphic layers with non-matching neuron counts")
+	}
+	m1.Snapshots["1"].Layers["hidden0"].Neurons = 2
+
+	// test an invalid topology
+	m1.Snapshots["1"].Layers["hidden0"].Successor = "hidden0"
+	err = m1.Validate()
+	if err == nil {
+		t.Errorf("Should have error-ed with topology errors")
+	}
+	m1.Snapshots["1"].Layers["hidden0"].Predecessor = "hidden0"
+	err = m1.Validate()
+	if err == nil {
+		t.Errorf("Should have error-ed with topology errors")
+	}
+	m1.Snapshots["1"].Layers["input"].Successor = "input"
+	m1.Snapshots["1"].Layers["input"].Predecessor = "input"
+	m1.Snapshots["1"].Layers["output"].Successor = "output"
+	m1.Snapshots["1"].Layers["output"].Predecessor = "output"
+	err = m1.Validate()
+	if err == nil {
+		t.Errorf("Should have error-ed with topology errors")
+	}
+
+}
+
+func TestMakeIsomorphicSnapshot(t *testing.T) {
+	m := getTestMLPX1()
+
+	// this should result in a valid MLPX, and we have already verified
+	// that the MLPX validation logic is correct in a separate test.
+	m.MakeIsomorphicSnapshot("1", "0")
+	err := m.Validate()
+	if err != nil {
+		t.Error(err)
 	}
 }

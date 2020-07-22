@@ -9,3 +9,12 @@ This project implements a trivial JSON-based format for storing and comparing sn
 ## Documentation
 
 * [mlpx(4)](./doc/mlpx.md)
+
+## Dependencies
+
+To run the linting checks:
+
+* `go get -u github.com/gordonklaus/ineffassign`
+* `go get -u github.com/kisielk/errcheck`
+* `go get -u golang.org/x/lint/golint`
+

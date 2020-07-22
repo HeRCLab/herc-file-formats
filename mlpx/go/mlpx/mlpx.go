@@ -14,10 +14,21 @@ import (
 type MLPX struct {
 
 	// Schema is used to represent the schema key
+	//
+	// Caveat: because of how encoding/json works, the version level
+	// is usually encoded as a float64.
 	Schema []interface{} `json: "schema"`
 
 	// Snapshots is used to represent the snapshot table.
 	Snapshots map[string]*Snapshot `json:"snapshots"`
+}
+
+// MakeMLPX creates a new, empty MLPX object
+func MakeMLPX() *MLPX {
+	return &MLPX{
+		Schema:    []interface{}{"mlpx", float64(0)},
+		Snapshots: make(map[string]*Snapshot),
+	}
 }
 
 // Snapshot represents a single snapshot definition
@@ -25,6 +36,37 @@ type Snapshot struct {
 
 	// Layers is the list of layers in the snapshot.
 	Layers map[string]*Layer `json: "layers"`
+}
+
+// MakeSnapshot creates a new, empty snapshot in the given MLPX object
+func (mlp *MLPX) MakeSnapshot(id string) error {
+	if _, ok := mlp.Snapshots[id]; ok {
+		return fmt.Errorf("Snapshot with ID '%s' already exists", id)
+	}
+
+	mlp.Snapshots[id] = &Snapshot{
+		Layers: make(map[string]*Layer),
+	}
+
+	return nil
+}
+
+// MakeIsomorphicSnapshot will create a new snapshot which is topologically
+// identical to the one specified. This is the preferred way of creating
+// snapshots, once the first has been defined, to guarantee that all snapshots
+// are isomorphic, which the spec requires.
+func (mlp *MLPX) MakeIsomorphicSnapshot(id, to string) error {
+	mlp.MakeSnapshot(id)
+
+	if _, ok := mlp.Snapshots[to]; !ok {
+		return fmt.Errorf("Specified snapshot '%s' does not exist", to)
+	}
+
+	for layerid, layer := range mlp.Snapshots[to].Layers {
+		mlp.Snapshots[id].MakeLayer(layerid, layer.Neurons, layer.Predecessor, layer.Successor)
+	}
+
+	return nil
 }
 
 // Layer represents a single layer definition
@@ -59,18 +101,27 @@ type Layer struct {
 	ActivationFunction string `json: "activation_function"`
 }
 
-// Validate checks the MLPX file for any errors. If none are found, it returns
-// nil.
-func (mlp *MLPX) Validate() error {
-
-	version, err := mlp.Version()
-	if err != nil {
-		return err
+// MakeLayer creates a new layer attached to the given snapshot. Where
+// appropriate (input/output layers), pred or succ may be empty strings.
+//
+// Note that referential integrity of pred and succ IS NOT VERIFIED at this
+// stage, since either or both referenced layers may not exist yet.
+func (snapshot *Snapshot) MakeLayer(id string, neurons int, pred, succ string) error {
+	if _, ok := snapshot.Layers[id]; ok {
+		return fmt.Errorf("Referenced layer '%s' already exists", id)
 	}
 
-	if version != 0 {
-		return fmt.Errorf("Unknown version number %d", version)
+	snapshot.Layers[id] = &Layer{
+		Predecessor: pred,
+		Successor:   succ,
+		Neurons:     neurons,
 	}
+
+	return nil
+}
+
+// validateReferences checks the MLP for referential integrity
+func (mlp *MLPX) validateReferences() error {
 
 	for snapid, snapshot := range mlp.Snapshots {
 		for layerid, layer := range snapshot.Layers {
@@ -135,6 +186,12 @@ func (mlp *MLPX) Validate() error {
 		}
 	}
 
+	return nil
+}
+
+// validateIsomorphism checks that all snapshots in the MLP are isomorphic
+// and have the same neuron counts.
+func (mlp *MLPX) validateIsomorphism() error {
 	// if we have made it this far, then we know that each snapshot is
 	// internally valid, so all we have left to do is verify that all
 	// layers have the same topology.
@@ -181,6 +238,115 @@ func (mlp *MLPX) Validate() error {
 					keyid, snapid, layer.Neurons, snapshot.Layers[layerid].Neurons, layerid)
 			}
 		}
+	}
+
+	return nil
+}
+
+// validateTopology checks that the topology of each snapshot is such that
+// the following facts hold true:
+//
+// * The number of in-edges for each non-input/output nodes is 1
+// * The number of out-edges for each non-input/output nodes is 1
+// * The number of in-edges for each input node is 0
+// * The number of out-edges for each input node is 1
+// * The number of in-edges for each output node is 1
+// * The number of out-edges for each output node is 0
+//
+// NOTE: this function assumes that the MLP has correct referential integrity.
+func (mlp *MLPX) validateTopology() error {
+
+	for snapid, snapshot := range mlp.Snapshots {
+
+		inEdges := make(map[string]int)
+		outEdges := make(map[string]int)
+
+		for layerid, layer := range snapshot.Layers {
+			// make sure that the referenced predecessor and
+			// successor also reference us
+			if layerid != "output" { // successor case
+				succpred := snapshot.Layers[layer.Successor].Predecessor
+				if succpred != layerid {
+					return fmt.Errorf("Snapshot '%s', layer '%s': successor layer '%s' has a different predecessor '%s'",
+						snapid, layerid, layer.Successor, succpred)
+				}
+			}
+
+			if layerid != "input" { // predecessor case
+				predsucc := snapshot.Layers[layer.Predecessor].Successor
+				if predsucc != layerid {
+					return fmt.Errorf("Snapshot '%s', layer '%s': predecessor layer '%s' has a different successor '%s'",
+						snapid, layerid, layer.Predecessor, predsucc)
+				}
+			}
+
+			if layerid != "output" {
+				inEdges[layer.Successor]++
+			}
+
+			if layerid != "input" {
+				outEdges[layer.Predecessor]++
+			}
+		}
+
+		for k, v := range inEdges {
+			if k == "input" {
+				if v != 0 {
+					return fmt.Errorf("Snapshot '%s', layer '%s': has wrong number of in-edges %d (expected 0)",
+						snapid, k, v)
+				}
+				continue
+			}
+			if v != 1 {
+				return fmt.Errorf("Snapshot '%s', layer '%s': has wrong number of in-edges %d (expected 1)",
+					snapid, k, v)
+			}
+		}
+
+		for k, v := range outEdges {
+			if k == "output" {
+				if v != 0 {
+					return fmt.Errorf("Snapshot '%s', layer '%s': has wrong number of out-edges %d (expected 0)",
+						snapid, k, v)
+				}
+				continue
+			}
+			if v != 1 {
+				return fmt.Errorf("Snapshot '%s', layer '%s': has wrong number of out-edges %d (expected 1)",
+					snapid, k, v)
+			}
+		}
+	}
+
+	return nil
+}
+
+// Validate checks the MLPX file for any errors. If none are found, it returns
+// nil.
+func (mlp *MLPX) Validate() error {
+
+	version, err := mlp.Version()
+	if err != nil {
+		return err
+	}
+
+	if version != 0 {
+		return fmt.Errorf("Unknown version number %d", version)
+	}
+
+	err = mlp.validateReferences()
+	if err != nil {
+		return err
+	}
+
+	err = mlp.validateIsomorphism()
+	if err != nil {
+		return err
+	}
+
+	err = mlp.validateTopology()
+	if err != nil {
+		return err
 	}
 
 	return nil

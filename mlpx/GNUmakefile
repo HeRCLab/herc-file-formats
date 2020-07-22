@@ -10,6 +10,8 @@ fmt:
 
 lint:
 > golint ./go/...
+> errcheck ./...
+> ineffassign ./
 .PHONY: lint
 
 coverage:
