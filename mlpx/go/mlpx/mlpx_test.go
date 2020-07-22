@@ -116,3 +116,111 @@ func TestMakeIsomorphicSnapshot(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestMLPX1Valid(t *testing.T) {
+	m := getTestMLPX1()
+	err := m.Validate()
+	if err != nil {
+		t.Log(err)
+		t.Fatalf("Test MLPX 1 is not valid, this means that other tests will almost certainly result in false negatives")
+	}
+}
+
+func TestSortedSnapshotIDs(t *testing.T) {
+	m := getTestMLPX1()
+
+	m.MustMakeIsomorphicSnapshot("1", "0")
+	m.MustMakeIsomorphicSnapshot("initializer", "0")
+	m.MustMakeIsomorphicSnapshot("02", "0")
+	m.MustMakeIsomorphicSnapshot("foo", "0")
+	m.MustMakeIsomorphicSnapshot("10", "0")
+	m.MustMakeIsomorphicSnapshot("aaa", "0")
+
+	// apparently sort.Slice is sometimes non-deterministic?!
+
+	for i := 0; i < 1000; i++ {
+		expect := []string{"initializer", "0", "1", "02", "10", "aaa", "foo"}
+
+		sorted := m.SortedSnapshotIDs()
+		if !cmp.Equal(sorted, expect) {
+			t.Logf("Expected: %v", expect)
+			t.Logf("Sorted: %v", sorted)
+			t.Fatalf("Sort order incorrect!")
+		}
+	}
+
+}
+
+func TestSnapshotSucessor(t *testing.T) {
+	m := getTestMLPX1()
+	cases := []struct {
+		input     string
+		expectID  string
+		shoulderr bool
+	}{
+		{"0", "1", false},
+		{"1", "", true},
+		{"2", "", true},
+	}
+
+	err := m.MakeIsomorphicSnapshot("1", "0")
+	if err != nil {
+		t.Error(err)
+	}
+
+	for i, c := range cases {
+		res, err := m.Snapshots["0"].Successor(c.input)
+		if err != nil {
+			if !c.shoulderr {
+				t.Errorf("Test case %d: %v should not have errored but did: %v", i, c, err)
+			}
+		} else if c.shoulderr {
+			t.Errorf("Test case %d: %v should have errored but did not", i, c)
+		}
+
+		if res == nil {
+			continue
+		}
+
+		if res.ID != c.expectID {
+			t.Errorf("Test case '%d: %v, output '%s' did not match expected '%s'", i, c, res.ID, c.expectID)
+		}
+	}
+}
+
+func TestSnapshotPredecessor(t *testing.T) {
+	m := getTestMLPX1()
+	cases := []struct {
+		input     string
+		expectID  string
+		shoulderr bool
+	}{
+		{"0", "", true},
+		{"1", "0", false},
+		{"2", "", true},
+	}
+
+	err := m.MakeIsomorphicSnapshot("1", "0")
+	if err != nil {
+		t.Error(err)
+	}
+
+	for i, c := range cases {
+		res, err := m.Snapshots["0"].Predecessor(c.input)
+		if err != nil {
+			if !c.shoulderr {
+				t.Errorf("Test case %d: %v should not have errored but did: %v", i, c, err)
+			}
+		} else if c.shoulderr {
+			t.Errorf("Test case %d: %v should have errored but did not", i, c)
+		}
+
+		if res == nil {
+			continue
+		}
+
+		if res.ID != c.expectID {
+			t.Errorf("Test case '%d: %v, output '%s' did not match expected '%s'", i, c, res.ID, c.expectID)
+		}
+	}
+}

@@ -5,6 +5,8 @@ package mlpx
 
 import (
 	"fmt"
+	"sort"
+	"strconv"
 )
 
 // MLPX represents an entire MLPX file
@@ -86,8 +88,91 @@ func (mlp *MLPX) MakeIsomorphicSnapshot(id, to string) error {
 	return nil
 }
 
-// func (mlp *MLPX) GetSuccessor(id string) (*Snapshot, error) {
-// }
+// MustMakeIsomorphicSnapshot is a wrapper around MakeIsomorphicSnapshot
+// that calls panic() if it errors.
+func (mlp *MLPX) MustMakeIsomorphicSnapshot(id, to string) {
+	err := mlp.MakeIsomorphicSnapshot(id, to)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// SortedSnapshotIDs returns the list of snapshot IDs, sorted in the canonical
+// order for MLPX. That is, the "initializer" snapshot sorts before everything
+// else, and numeric snapshot IDs are sorted by numeric value, rather than
+// by string comparison"
+func (mlp *MLPX) SortedSnapshotIDs() []string {
+	snapids := make([]string, 0)
+	for k := range mlp.Snapshots {
+		snapids = append(snapids, k)
+	}
+
+	sort.Slice(snapids, func(i, j int) bool {
+		if snapids[i] == "initializer" {
+			return true
+		}
+
+		ii, ierr := strconv.Atoi(snapids[i])
+		ji, jerr := strconv.Atoi(snapids[j])
+
+		if ierr == nil && jerr == nil {
+			// both IDs are numeric
+			return ii < ji
+		} else if ierr == nil && jerr != nil {
+			// i is numeric, j is not, so i sorts first
+			return true
+		} else if ierr != nil && jerr == nil {
+			// i is non-numeric, j is numeric, so j sorts first
+			return false
+		} else { //ierr != nil && jerr != nil
+			return snapids[i] < snapids[j]
+		}
+
+	})
+
+	return snapids
+}
+
+// GetSuccessor returns the successor of a given snapshot, being the
+// snapshot which occurs next after the specified one.
+func (snapshot *Snapshot) Successor(id string) (*Snapshot, error) {
+	mlp := snapshot.Parent
+
+	snapids := mlp.SortedSnapshotIDs()
+
+	for i, v := range snapids {
+		if id == v {
+			if (i + 1) >= len(snapids) {
+				return nil, fmt.Errorf("Snapshot '%s' is the final snapshot available", id)
+			}
+			return mlp.Snapshots[snapids[i+1]], nil
+		}
+	}
+
+	return nil, fmt.Errorf("no such snapshot '%s'", id)
+}
+
+// GetPredecessor returns the predecessor of a given snapshot, being the
+// snapshot which occurs next after the specified one.
+func (snapshot *Snapshot) Predecessor(id string) (*Snapshot, error) {
+	mlp := snapshot.Parent
+	snapids := make([]string, 0)
+	for k := range mlp.Snapshots {
+		snapids = append(snapids, k)
+	}
+
+	sort.Strings(snapids)
+	for i, v := range snapids {
+		if id == v {
+			if (i - 1) < 0 {
+				return nil, fmt.Errorf("Snapshot '%s' is the earliest snapshot available", id)
+			}
+			return mlp.Snapshots[snapids[i-1]], nil
+		}
+	}
+
+	return nil, fmt.Errorf("no such snapshot '%s'", id)
+}
 
 // Layer represents a single layer definition
 type Layer struct {
