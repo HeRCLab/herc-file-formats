@@ -87,7 +87,7 @@ func (mlp *MLPX) Validate() error {
 			if layerid != "output" {
 				// output layers don't have successors
 				if _, ok := snapshot.Layers[layer.Successor]; !ok {
-					return fmt.Errorf("Snapshot '%s', layer '%s': predecessor '%s' references nonexistent layer",
+					return fmt.Errorf("Snapshot '%s', layer '%s': successor '%s' references nonexistent layer",
 						snapid, layerid, layer.Predecessor)
 				}
 			}
@@ -201,16 +201,25 @@ func (mlp *MLPX) Version() (int, error) {
 	if !ok {
 		return -1, fmt.Errorf("Schema component 0 is not a string: %v", mlp.Schema[0])
 	}
-	version, ok := mlp.Schema[1].(int)
+
+	// By default, we're going to get a float64 back, even though per the
+	// spec this is actually an integer.
+	version, ok := mlp.Schema[1].(float64)
 	if !ok {
-		return -1, fmt.Errorf("Schema component 1 is not an integer: %v", mlp.Schema[1])
+		// make things a little more convenient for people using the
+		// API by allowing integers.
+		versionf, ok := mlp.Schema[1].(int)
+		version = float64(versionf)
+		if !ok {
+			return -1, fmt.Errorf("Schema component 1 is not a number : %v", mlp.Schema[1])
+		}
 	}
 
 	if schema != "mlpx" {
 		return -2, fmt.Errorf("Schema component 0 is '%s', expected 'mlpx'", schema)
 	}
 
-	return version, nil
+	return int(version), nil
 }
 
 // ToJSON converts an existing MLPX object to a JSON string and returns it.
