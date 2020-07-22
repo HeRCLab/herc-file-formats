@@ -8,6 +8,7 @@ import (
 
 // ToJSON converts an existing MLPX object to a JSON string and returns it.
 func (mlp *MLPX) ToJSON() ([]byte, error) {
+
 	b, err := json.MarshalIndent(mlp, "", "\t")
 	if err != nil {
 		return nil, err
@@ -49,6 +50,18 @@ func FromJSON(data []byte) (*MLPX, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// we populate all the IDs for our snapshots and layers, since the
+	// JSON unmarshalling logic doesn't know how to
+	for snapid, snapshot := range mlp.Snapshots {
+		snapshot.ID = snapid
+		snapshot.Parent = mlp
+		for layerid, layer := range snapshot.Layers {
+			layer.ID = layerid
+			layer.Parent = snapshot
+		}
+	}
+
 	return mlp, err
 }
 

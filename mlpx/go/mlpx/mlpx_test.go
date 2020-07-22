@@ -171,18 +171,9 @@ func TestValidate(t *testing.T) {
 
 	// test non-isomorphic snapshots -- different lengths of snapshot lists
 	// case
-	m1.Snapshots["1"] = &Snapshot{
-		Layers: map[string]*Layer{
-			"input": &Layer{
-				Successor: "output",
-				Neurons:   2,
-			},
-			"output": &Layer{
-				Predecessor: "input",
-				Neurons:     2,
-			},
-		},
-	}
+	m1.MakeSnapshot("1")
+	m1.Snapshots["1"].MakeLayer("input", 2, "", "output")
+	m1.Snapshots["1"].MakeLayer("output", 2, "input", "")
 	err = m1.Validate()
 	if err == nil {
 		t.Errorf("Should have error-ed with non-isomorphic layers")

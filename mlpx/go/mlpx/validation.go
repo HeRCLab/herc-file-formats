@@ -8,7 +8,23 @@ import (
 func (mlp *MLPX) validateReferences() error {
 
 	for snapid, snapshot := range mlp.Snapshots {
+		if snapid != snapshot.ID {
+			return fmt.Errorf("Snapshot '%s': snapshot ID in struct and in MLPX table do not match, your MLPX implementation has a bug! ('%s' =/= '%s')", snapid, snapid, snapshot.ID)
+		}
+		if snapshot.Parent != mlp {
+			return fmt.Errorf("Snapshot '%s': parent pointer does not reference the parent MLPX object, your MLPX implementation has bugs!", snapid)
+		}
+
 		for layerid, layer := range snapshot.Layers {
+			if layer.Parent != snapshot {
+				return fmt.Errorf("Snapshot '%s', layer '%s': parent pointer does not reference the parent snapshot object, your MLPX implementation has bugs!", snapid, layerid)
+			}
+
+			if layerid != layer.ID {
+				return fmt.Errorf("Snapshot '%s', layer '%s': snapshot ID in struct and in MLPX table do not match, your MLPX implementation has a bug! ('%s' =/= '%s')",
+					snapid, layerid, layerid, layer.ID)
+			}
+
 			// verify integrity of predecessor references
 			if layerid != "input" {
 				// input layers don't have predecessors

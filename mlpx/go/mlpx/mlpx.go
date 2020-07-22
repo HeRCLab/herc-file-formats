@@ -31,6 +31,18 @@ func MakeMLPX() *MLPX {
 // Snapshot represents a single snapshot definition
 type Snapshot struct {
 
+	// Parent is the MLPX object which this snapshot belongs to.
+	//
+	// DANGER: modify this field with care, changing this may corrupt the
+	// in-memory representation of the MLP.
+	Parent *MLPX `json:"-"`
+
+	// ID is the snapshot ID
+	//
+	// DANGER: modify this field with care, changing this may corrupt the
+	// in-memory representation of the MLP.
+	ID string `json:"-"`
+
 	// Layers is the list of layers in the snapshot.
 	Layers map[string]*Layer `json: "layers"`
 }
@@ -42,6 +54,8 @@ func (mlp *MLPX) MakeSnapshot(id string) error {
 	}
 
 	mlp.Snapshots[id] = &Snapshot{
+		Parent: mlp,
+		ID:     id,
 		Layers: make(map[string]*Layer),
 	}
 
@@ -66,8 +80,22 @@ func (mlp *MLPX) MakeIsomorphicSnapshot(id, to string) error {
 	return nil
 }
 
+// func (mlp *MLPX) GetSuccessor(id string) (*Snapshot, error) {
+// }
+
 // Layer represents a single layer definition
 type Layer struct {
+	// Parent is the Snapshot object which the layer belongs to.
+	//
+	// DANGER: modify this field with care, changing this may corrupt
+	// the in-memory representation of the MLP.
+	Parent *Snapshot `json:"-"`
+
+	// ID is the layer ID
+	//
+	// DANGER: modify this field with care, changing this may corrupt the
+	// in-memory representation of the MLP.
+	ID string `json:"-"`
 
 	// Predecessor is the preceding layer ID
 	Predecessor string `json: "predecessor"`
@@ -109,6 +137,8 @@ func (snapshot *Snapshot) MakeLayer(id string, neurons int, pred, succ string) e
 	}
 
 	snapshot.Layers[id] = &Layer{
+		Parent:      snapshot,
+		ID:          id,
 		Predecessor: pred,
 		Successor:   succ,
 		Neurons:     neurons,
