@@ -1,30 +1,17 @@
 include ./opinionated.mk
 
 test:
-> go test -timeout 30s ./go/...
+> $(MAKE) -C ./go test
+> $(MAKE) -C ./c test
 .PHONY: test
 
-fmt:
-> go fmt ./go/...
-.PHONY: fmt
-
 lint:
-> golint ./go/...
-> errcheck ./...
-> ineffassign ./
+> $(MAKE) -C ./go lint
 .PHONY: lint
 
-coverage:
-> go test -timeout 30s -coverprofile /dev/null ./go/...
-.PHONY: coverage
-
-viewcoverage:
-> go test -timeout 30s -coverprofile cover.out ./go/...
-> go tool cover -html=cover.out
-.PHONY: viewcoverage
-
 clean:
-> rm -rf cover.out
-> go clean
-> go clean -testcache
+> $(MAKE) -C ./go clean
+> $(MAKE) -C ./c clean
 .PHONY: clean
+
+

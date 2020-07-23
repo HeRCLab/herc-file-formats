@@ -39,22 +39,10 @@ func getTestJSON1() string {
 
 func getTestMLPX1() *MLPX {
 	m := MakeMLPX()
-	err := m.MakeSnapshot("0")
-	if err != nil {
-		panic(err)
-	}
-	err = m.Snapshots["0"].MakeLayer("input", 2, "", "hidden0")
-	if err != nil {
-		panic(err)
-	}
-	err = m.Snapshots["0"].MakeLayer("hidden0", 2, "input", "output")
-	if err != nil {
-		panic(err)
-	}
-	err = m.Snapshots["0"].MakeLayer("output", 2, "hidden0", "")
-	if err != nil {
-		panic(err)
-	}
+	m.MustMakeSnapshot("0")
+	m.Snapshots["0"].MustMakeLayer("input", 2, "", "hidden0")
+	m.Snapshots["0"].MustMakeLayer("hidden0", 2, "input", "output")
+	m.Snapshots["0"].MustMakeLayer("output", 2, "hidden0", "")
 
 	m.Snapshots["0"].Layers["hidden0"].Weights = &[]float64{1.5, 2.5, 3.5, 4}
 	m.Snapshots["0"].Layers["output"].Outputs = &[]float64{0.5, 1.4}
@@ -222,5 +210,25 @@ func TestSnapshotPredecessor(t *testing.T) {
 		if res.ID != c.expectID {
 			t.Errorf("Test case '%d: %v, output '%s' did not match expected '%s'", i, c, res.ID, c.expectID)
 		}
+	}
+}
+
+func TestSortedLayerIDs(t *testing.T) {
+	m := MakeMLPX()
+	m.MustMakeSnapshot("0")
+	m.Snapshots["0"].MustMakeLayer("input", 2, "", "hidden0")
+	m.Snapshots["0"].MustMakeLayer("hidden0", 2, "input", "aaaa")
+	m.Snapshots["0"].MustMakeLayer("aaaa", 2, "hidden0", "0000")
+	m.Snapshots["0"].MustMakeLayer("0000", 2, "aaaa", "output")
+	m.Snapshots["0"].MustMakeLayer("output", 2, "hidden0", "")
+
+	layerids := m.Snapshots["0"].SortedLayerIDs()
+	expect := []string{"input", "hidden0", "aaaa", "0000", "output"}
+
+	t.Logf("sorted layer IDs: %v", layerids)
+	t.Logf("expected layer IDs: %v", expect)
+
+	if !cmp.Equal(layerids, expect) {
+		t.Errorf("Sorted layer IDs were incorrect!")
 	}
 }

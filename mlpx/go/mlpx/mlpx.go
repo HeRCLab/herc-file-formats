@@ -64,6 +64,14 @@ func (mlp *MLPX) MakeSnapshot(id string) error {
 	return nil
 }
 
+// MustMakeSnapshot is a wrapper around MakeSnapshot which errors if it fails
+func (mlp *MLPX) MustMakeSnapshot(id string) {
+	err := mlp.MakeSnapshot(id)
+	if err != nil {
+		panic(err)
+	}
+}
+
 // MakeIsomorphicSnapshot will create a new snapshot which is topologically
 // identical to the one specified. This is the preferred way of creating
 // snapshots, once the first has been defined, to guarantee that all snapshots
@@ -135,6 +143,62 @@ func (mlp *MLPX) SortedSnapshotIDs() []string {
 	})
 
 	return snapids
+}
+
+// SortedLayerIDs returns a list of layer IDs in sorted order. IDs are sorted
+// by their topology.
+//
+// If the MLPX is invalid, then the behavior of this function is undefined.
+// In particular, cycles are not valid in MLPX, and may cause unusual behavior.
+func (snapshot *Snapshot) SortedLayerIDs() []string {
+	layerids := make([]string, 0)
+
+	// first we need to find the "first" layer, usually this is the input
+	// layer
+	firstID := ""
+	for layerid, layer := range snapshot.Layers {
+		// we have to pick *something*, even if it's nonsense
+		firstID = layerid
+		if layerid == "input" {
+			break
+		} else if _, ok := snapshot.Layers[layer.Predecessor]; !ok {
+			// user is doing something naughty, but we'll allow it
+			// and pretend the first layer we find with no valid
+			// predecessor is the "input"
+			break
+		}
+	}
+
+	first, ok := snapshot.Layers[firstID]
+	if !ok {
+		// this implies there are no layers
+		return layerids
+	}
+
+	current := first
+
+	for {
+
+		// detect cycles and bail out
+		for _, v := range layerids {
+			if v == current.ID {
+				return layerids
+			}
+		}
+
+		layerids = append(layerids, current.ID)
+
+		next, ok := snapshot.Layers[current.Successor]
+		if !ok {
+			// we're done, we got to the output layer
+			return layerids
+		}
+
+		current = next
+	}
+
+	return layerids
+
 }
 
 // GetSuccessor returns the successor of a given snapshot, being the
@@ -240,6 +304,15 @@ func (snapshot *Snapshot) MakeLayer(id string, neurons int, pred, succ string) e
 	}
 
 	return nil
+}
+
+// MustMakeLayer is a wrapper around MakeLayer which panics if it encounters an
+// error.
+func (snapshot *Snapshot) MustMakeLayer(id string, neurons int, pred, succ string) {
+	err := snapshot.MakeLayer(id, neurons, pred, succ)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // Version retrieves the MLPX schema version of the given file. It can error if

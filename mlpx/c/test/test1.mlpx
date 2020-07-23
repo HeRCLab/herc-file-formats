@@ -1,0 +1,26 @@
+ {
+  "schema": ["mlpx", 0],
+  "snapshots": {
+   "0": {
+    "layers": {
+     "input": {
+      "successor": "hidden0",
+      "neurons": 2
+     },
+     "hidden0": {
+      "successor": "output",
+      "predecessor": "input",
+      "neurons": 2,
+      "weights": [1.5, 2.5, 3.5, 4]
+
+     },
+     "output": {
+      "predecessor": "hidden0",
+      "neurons": 2,
+      "outputs": [0.5, 1.4]
+     }
+    }
+   }
+  }
+ }
+
