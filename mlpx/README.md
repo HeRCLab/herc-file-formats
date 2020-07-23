@@ -8,7 +8,7 @@ This project implements a trivial JSON-based format for storing and comparing sn
 
 ## Documentation
 
-* [mlpx(4)](./doc/mlpx.md)
+* [mlpx(5)](./doc/5/mlpx.md)
 
 ## Dependencies
 

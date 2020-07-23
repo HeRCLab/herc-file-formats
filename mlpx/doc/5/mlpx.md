@@ -1,4 +1,4 @@
-mlpx(4) -- the MLP eXchange Format
+mlpx(5) -- the MLP eXchange Format
 ==================================
 
 ## Description

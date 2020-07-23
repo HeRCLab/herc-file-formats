@@ -77,8 +77,8 @@ func MLPXGetNumSnapshots(handle C.int, snapc *C.int) C.int {
 	return 0
 }
 
-//export MLPXGetSnapshotIDByIndex
-func MLPXGetSnapshotIDByIndex(handle C.int, index C.int, id **C.char) C.int {
+//export MLPXSnapshotGetIDByIndex
+func MLPXSnapshotGetIDByIndex(handle C.int, index C.int, id **C.char) C.int {
 	mlp := getMLP(handle)
 	if mlp == nil {
 		return 1
@@ -95,8 +95,8 @@ func MLPXGetSnapshotIDByIndex(handle C.int, index C.int, id **C.char) C.int {
 	return 0
 }
 
-//export MLPXGetSnapshotIndexByID
-func MLPXGetSnapshotIndexByID(handle C.int, id *C.char, index *C.int) C.int {
+//export MLPXSnapshotGetIndexByID
+func MLPXSnapshotGetIndexByID(handle C.int, id *C.char, index *C.int) C.int {
 	mlp := getMLP(handle)
 	if mlp == nil {
 		return 1
@@ -180,8 +180,8 @@ func getLayer(handle, snapshotIndex, layerIndex C.int) *mlpx.Layer {
 }
 
 //export MLPXLayerGetIDByIndex
-func MLPXLayerGetIDByIndex(handle, snapshotIndex, index C.int, id **C.char) C.int {
-	layer := getLayer(handle, snapshotIndex, index)
+func MLPXLayerGetIDByIndex(handle, snapshotIndex, layerIndex C.int, id **C.char) C.int {
+	layer := getLayer(handle, snapshotIndex, layerIndex)
 	if layer == nil {
 		return 1
 	}
