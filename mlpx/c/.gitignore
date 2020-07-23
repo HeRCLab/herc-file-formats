@@ -1,0 +1,4 @@
+*.so
+*.o
+mlpx.h
+test/mlpx.h

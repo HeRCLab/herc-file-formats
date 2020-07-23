@@ -1,8 +1,6 @@
 github.com/google/go-cmp v0.5.1 h1:JFrFEBb2xKufg6XkJsJr+WbKb4FQlURi5RUcBveYu9k=
 github.com/google/go-cmp v0.5.1/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/gordonklaus/ineffassign v0.0.0-20200309095847-7953dde2c7bf/go.mod h1:cuNKsD1zp2v6XfE/orVX2QE1LC+i254ceGcVeDT3pTU=
-github.com/herclab/herc-file-formats v0.0.0-20200723170906-c48611127a9a h1:5aEvpUDI3gk+EeNWkSylNBy6ww6HJFKeLURIX0+UFqE=
-github.com/herclab/herc-file-formats/mlpx v0.0.0-20200722223454-73f668e7dc41 h1:iUqexeGMyIxoPkt+bJqPrOWcXND0+/H5qXcC11GVU3U=
 github.com/herclab/herc-file-formats/mlpx/go v0.0.0-20200723170906-c48611127a9a h1:E7rVWLl+/4QsXRcJ8TpW3lBFz2WsWeJ38BUarOosQus=
 github.com/herclab/herc-file-formats/mlpx/go v0.0.0-20200723170906-c48611127a9a/go.mod h1:5/sJ53bYaCJpQtsqLw6WjfwRkHMTuSxNMcjpG3cIp1I=
 github.com/kisielk/errcheck v1.4.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
