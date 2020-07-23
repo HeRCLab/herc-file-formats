@@ -23,7 +23,8 @@ func getTestJSON1() string {
 						"successor": "output",
 						"predecessor": "input",
 						"neurons": 2,
-						"weights": [1.5, 2.5, 3.5, 4]
+						"weights": [1.5, 2.5, 3.5, 4],
+						"activation_function": "foobar"
 
 					},
 					"output": {
@@ -46,6 +47,7 @@ func getTestMLPX1() *MLPX {
 
 	m.Snapshots["0"].Layers["hidden0"].Weights = &[]float64{1.5, 2.5, 3.5, 4}
 	m.Snapshots["0"].Layers["output"].Outputs = &[]float64{0.5, 1.4}
+	m.Snapshots["0"].Layers["hidden0"].ActivationFunction = "foobar"
 
 	return m
 }
@@ -64,9 +66,6 @@ func TestEndcodeDecode(t *testing.T) {
 
 	if !cmp.Equal(m1, m2) {
 		t.Errorf("Decoded JSON does not match expected value")
-		for _, v := range pretty.Diff(m1, m2) {
-			t.Logf(v)
-		}
 	}
 
 	b1, err := m1.ToJSON()
@@ -83,9 +82,6 @@ func TestEndcodeDecode(t *testing.T) {
 
 	if !cmp.Equal(m1, m3) {
 		t.Errorf("Decoded JSON does not match expected value")
-		for _, v := range pretty.Diff(m1, m3) {
-			t.Logf(v)
-		}
 	}
 }
 

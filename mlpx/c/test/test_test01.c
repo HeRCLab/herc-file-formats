@@ -8,6 +8,7 @@
 int main(int argc, char** argv) {
 	int handle, snapc, layerc, layeridx, neuronc, initializer, pred, succ;
 	char* layerid;
+	char* funct;
 	double weight, output, activation, delta, bias;
 	should_equal(MLPXOpen("test1.mlpx", &handle), 0);
 
@@ -58,6 +59,12 @@ int main(int argc, char** argv) {
 	should_equal(MLPXLayerSetBias(handle, 0, 1, 1, 8.2), 0);
 	should_equal(MLPXLayerGetBias(handle, 0, 1, 1, &bias), 0);
 	should_equal_epsilon(bias, 8.2, 0.00001);
+
+	should_equal(MLPXLayerGetActivationFunction(handle, 0, 1, &funct), 0);
+	str_should_equal(funct, "foobar");
+	should_equal(MLPXLayerSetActivationFunction(handle, 0, 1, "baz"), 0);
+	should_equal(MLPXLayerGetActivationFunction(handle, 0, 1, &funct), 0);
+	str_should_equal(funct, "baz");
 
 	should_equal(MLPXClose(handle), 0);
 }

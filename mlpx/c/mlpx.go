@@ -491,4 +491,26 @@ func MLPXLayerGetBias(handle, snapshotIndex, layerIndex, subscript C.int, value 
 	return 0
 }
 
+//export MLPXLayerSetActivationFunction
+func MLPXLayerSetActivationFunction(handle, snapshotIndex, layerIndex C.int, funct *C.char) C.int {
+	layer := getLayer(handle, snapshotIndex, layerIndex)
+	if layer == nil {
+		return 1
+	}
+
+	layer.ActivationFunction = C.GoString(funct)
+	return 0
+}
+
+//export MLPXLayerGetActivationFunction
+func MLPXLayerGetActivationFunction(handle, snapshotIndex, layerIndex C.int, funct **C.char) C.int {
+	layer := getLayer(handle, snapshotIndex, layerIndex)
+	if layer == nil {
+		return 1
+	}
+
+	*funct = C.CString(layer.ActivationFunction)
+	return 0
+}
+
 func main() {}

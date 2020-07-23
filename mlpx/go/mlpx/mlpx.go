@@ -266,32 +266,32 @@ type Layer struct {
 	ID string `json:"-"`
 
 	// Predecessor is the preceding layer ID
-	Predecessor string `json: "predecessor"`
+	Predecessor string `json:"predecessor"`
 
 	// Successor is the following layer ID
-	Successor string `json: "successor"`
+	Successor string `json:"successor"`
 
 	// Neurons is the number of neurons in the layer
 	Neurons int `json: "neurons"`
 
 	// Weights is the weights list for the layers
-	Weights *[]float64 `json: "weights"`
+	Weights *[]float64 `json:"weights"`
 
 	// Outputs is the outputs list for the layer
-	Outputs *[]float64 `json: "outputs"`
+	Outputs *[]float64 `json:"outputs"`
 
 	// Activations is the activation value list for the layer
-	Activations *[]float64 `json: "activations"`
+	Activations *[]float64 `json:"activations"`
 
 	// Deltas is the deltas list for the layer
-	Deltas *[]float64 `json: "deltas"`
+	Deltas *[]float64 `json:"deltas"`
 
 	// Biases is the biases list for the layer
-	Biases *[]float64 `json: "biases"`
+	Biases *[]float64 `json:"biases"`
 
 	// ActivationFunction is the human-readable activation function used by
 	// the layer
-	ActivationFunction string `json: "activation_function"`
+	ActivationFunction string `json:"activation_function"`
 }
 
 // EnsureWeights guarantees that the weights matrix for the layer is non-nil
