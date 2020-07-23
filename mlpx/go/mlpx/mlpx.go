@@ -145,6 +145,15 @@ func (mlp *MLPX) SortedSnapshotIDs() []string {
 	return snapids
 }
 
+// Initializer returns the initializer snapshot if any
+func (mlp *MLPX) Initializer() (*Snapshot, error) {
+	ids := mlp.SortedSnapshotIDs()
+	if len(ids) < 1 {
+		return nil, fmt.Errorf("No snapshots available")
+	}
+	return mlp.Snapshots[ids[0]], nil
+}
+
 // SortedLayerIDs returns a list of layer IDs in sorted order. IDs are sorted
 // by their topology.
 //
@@ -283,6 +292,46 @@ type Layer struct {
 	// ActivationFunction is the human-readable activation function used by
 	// the layer
 	ActivationFunction string `json: "activation_function"`
+}
+
+// EnsureWeights guarantees that the weights matrix for the layer is non-nil
+func (layer *Layer) EnsureWeights() {
+	if layer.Weights == nil {
+		w := make([]float64, layer.Neurons*layer.Parent.Layers[layer.Predecessor].Neurons)
+		layer.Weights = &w
+	}
+}
+
+// EnsureOutputs guarantees that the outputs matrix for the layer is non-nil
+func (layer *Layer) EnsureOutputs() {
+	if layer.Outputs == nil {
+		o := make([]float64, layer.Neurons)
+		layer.Outputs = &o
+	}
+}
+
+// EnsureActivations guarantees that the outputs matrix for the layer is non-nil
+func (layer *Layer) EnsureActivations() {
+	if layer.Activations == nil {
+		a := make([]float64, layer.Neurons)
+		layer.Activations = &a
+	}
+}
+
+// EnsureDeltas guarantees that the outputs matrix for the layer is non-nil
+func (layer *Layer) EnsureDeltas() {
+	if layer.Deltas == nil {
+		d := make([]float64, layer.Neurons)
+		layer.Deltas = &d
+	}
+}
+
+// EnsureBiases guarantees that the outputs matrix for the layer is non-nil
+func (layer *Layer) EnsureBiases() {
+	if layer.Biases == nil {
+		b := make([]float64, layer.Neurons)
+		layer.Biases = &b
+	}
 }
 
 // MakeLayer creates a new layer attached to the given snapshot. Where

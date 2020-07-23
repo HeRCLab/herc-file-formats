@@ -1,6 +1,5 @@
 #!/bin/sh
 
-set -x
 set -e
 
 cd "$(dirname "$0")"
@@ -10,8 +9,10 @@ cp ./mlpx.so ./mlpx.h ./test
 cd ./test
 
 for f in test_*.c ; do
+	set -x
 	cc "$f" ./mlpx.so
 	./a.out
+	set +x
 	rm -f a.out
 done
 
