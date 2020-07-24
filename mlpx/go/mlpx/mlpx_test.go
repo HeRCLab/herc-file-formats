@@ -228,3 +228,11 @@ func TestSortedLayerIDs(t *testing.T) {
 		t.Errorf("Sorted layer IDs were incorrect!")
 	}
 }
+
+func TestNextSnapshotID(t *testing.T) {
+	m := getTestMLPX1()
+	id := m.NextSnapshotID()
+	if id != "1" {
+		t.Errorf("expected next snapshot ID to be '1', but was '%s'", id)
+	}
+}
