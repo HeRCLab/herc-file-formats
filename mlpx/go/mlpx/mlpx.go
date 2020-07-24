@@ -49,6 +49,19 @@ type Snapshot struct {
 	Layers map[string]*Layer `json: "layers"`
 }
 
+// NextSnapshotID returns the next canonical snapshot ID. If no snapshots have
+// been taken, it returns "initializer". It otherwise returns an integer
+// starting from 0 and increasing contiguously.
+func (mlp *MLPX) NextSnapshotID() string {
+	snapids := mlp.SortedSnapshotIDs()
+
+	if len(snapids) == 0 {
+		return "intializer"
+	}
+
+	return fmt.Sprintf("%d", len(snapids))
+}
+
 // MakeSnapshot creates a new, empty snapshot in the given MLPX object
 func (mlp *MLPX) MakeSnapshot(id string) error {
 	if _, ok := mlp.Snapshots[id]; ok {
