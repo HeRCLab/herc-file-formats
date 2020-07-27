@@ -86,7 +86,7 @@ func TestValidate(t *testing.T) {
 
 	// test non-isomorphic snapshots -- different lengths of snapshot lists
 	// case
-	err = m1.MakeSnapshot("1")
+	err = m1.MakeSnapshot("1", 0.1)
 	if err != nil {
 		t.Error(err)
 	}

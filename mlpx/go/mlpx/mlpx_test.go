@@ -14,6 +14,7 @@ func getTestJSON1() string {
 		"schema": ["mlpx", 0],
 		"snapshots": {
 			"0": {
+				"alpha": 0.1,
 				"layers": {
 					"input": {
 						"successor": "hidden0",
@@ -40,7 +41,7 @@ func getTestJSON1() string {
 
 func getTestMLPX1() *MLPX {
 	m := MakeMLPX()
-	m.MustMakeSnapshot("0")
+	m.MustMakeSnapshot("0", 0.1)
 	m.Snapshots["0"].MustMakeLayer("input", 2, "", "hidden0")
 	m.Snapshots["0"].MustMakeLayer("hidden0", 2, "input", "output")
 	m.Snapshots["0"].MustMakeLayer("output", 2, "hidden0", "")
@@ -211,7 +212,7 @@ func TestSnapshotPredecessor(t *testing.T) {
 
 func TestSortedLayerIDs(t *testing.T) {
 	m := MakeMLPX()
-	m.MustMakeSnapshot("0")
+	m.MustMakeSnapshot("0", 0.1)
 	m.Snapshots["0"].MustMakeLayer("input", 2, "", "hidden0")
 	m.Snapshots["0"].MustMakeLayer("hidden0", 2, "input", "aaaa")
 	m.Snapshots["0"].MustMakeLayer("aaaa", 2, "hidden0", "0000")

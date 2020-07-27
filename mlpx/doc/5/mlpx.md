@@ -35,7 +35,7 @@ but **should** use `initializer` as the default.
 A snapshot definition is used to record the state of an MLP at a particular
 point in time.
 
-A snapshot defintion is a JSON object which **must** include the following
+A snapshot definition is a JSON object which **must** include the following
 keys:
 
 * `layers` -- a table of Layer Definition objects, as described below. Keys
@@ -45,6 +45,11 @@ The following layer IDs are reserved:
 
 * `input` -- used exclusively for the input layer
 * `output` -- used exclusively for the output layer
+
+
+A snapshot definition **may** include the following keys:
+
+* `alpha` -- specifies the learning rate for the given snapshot
 
 Other layer IDs may be arbitrary strings.
 

@@ -72,6 +72,12 @@ freed by the caller as appropriate.
 * **int MLPXSnapshotGetNumLayers(int handle, int snapshotIndex, int\* layerc);**:
 	Retrieves the number of layers in a snapshot by it's numeric index.
 
+* **int MLPXSnapshotGetAlpha(int handle, int snapshotIndex, double\* alpha);**:
+	Retrieves the defined alpha value for the given snapshot.
+
+* **int MLPXSnapshotSetAlpha(int handle, int snapshotIndex, double alpha);**:
+	Modify the alpha value for the given snapshot.
+
 * **int MLPXLayerGetIndexByID(int handle, int snapshotIndex, char\* id, int\* index);**:
 	Retrieves the numeric index of a layer within a given snapshot by it's
 	string identifier.
@@ -87,7 +93,7 @@ freed by the caller as appropriate.
 * **int MLPXMakeMLPX(int\* handle);**:
 	Create a new, empty MLPX object without loading from disk.
 
-* **int MLPXMakeSnapshot(int handle, char\* id);**:
+* **int MLPXMakeSnapshot(int handle, char\* id, double alpha);**:
 	Create a new snapshot in a given MLP. The created snapshot's index can
 	later be retrieved using `MLPXSnapshotGetIndexByID()` if needed.
 

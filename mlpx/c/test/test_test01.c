@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
 	int handle, snapc, layerc, layeridx, neuronc, initializer, pred, succ;
 	char* layerid;
 	char* funct;
-	double weight, output, activation, delta, bias;
+	double weight, output, activation, delta, bias, alpha;
 	should_equal(MLPXOpen("test1.mlpx", &handle), 0);
 
 	should_equal(MLPXGetNumSnapshots(handle, &snapc), 0);
@@ -65,6 +65,12 @@ int main(int argc, char** argv) {
 	should_equal(MLPXLayerSetActivationFunction(handle, 0, 1, "baz"), 0);
 	should_equal(MLPXLayerGetActivationFunction(handle, 0, 1, &funct), 0);
 	str_should_equal(funct, "baz");
+
+	should_equal(MLPXSnapshotGetAlpha(handle, 0, &alpha), 0);
+	should_equal_epsilon(alpha, 0.1, 0.0001);
+	should_equal(MLPXSnapshotSetAlpha(handle, 0, 0.2), 0);
+	should_equal(MLPXSnapshotGetAlpha(handle, 0, &alpha), 0);
+	should_equal_epsilon(alpha, 0.2, 0.0001);
 
 	should_equal(MLPXClose(handle), 0);
 }

@@ -214,13 +214,13 @@ func MLPXMakeMLPX(handle *C.int) C.int {
 }
 
 //export MLPXMakeSnapshot
-func MLPXMakeSnapshot(handle C.int, id *C.char) C.int {
+func MLPXMakeSnapshot(handle C.int, id *C.char, alpha C.double) C.int {
 	mlp := getMLP(handle)
 	if mlp == nil {
 		return 1
 	}
 
-	err := mlp.MakeSnapshot(C.GoString(id))
+	err := mlp.MakeSnapshot(C.GoString(id), float64(alpha))
 	if err != nil {
 		lastError = fmt.Sprintf("%v", err)
 		return 1
@@ -274,6 +274,30 @@ func MLPXGetInitializerSnapshotIndex(handle C.int, index *C.int) C.int {
 	lastError = fmt.Sprintf("No initializer found")
 	return 1
 
+}
+
+//export MLPXSnapshotGetAlpha
+func MLPXSnapshotGetAlpha(handle, snapshotIndex C.int, alpha *C.double) C.int {
+	snapshot := getSnapshot(handle, snapshotIndex)
+	if snapshot == nil {
+		return 1
+	}
+
+	*alpha = C.double(snapshot.Alpha)
+
+	return 0
+}
+
+//export MLPXSnapshotSetAlpha
+func MLPXSnapshotSetAlpha(handle, snapshotIndex C.int, alpha C.double) C.int {
+	snapshot := getSnapshot(handle, snapshotIndex)
+	if snapshot == nil {
+		return 1
+	}
+
+	snapshot.Alpha = float64(alpha)
+
+	return 0
 }
 
 //export MLPXLayerGetPredecessorIndex

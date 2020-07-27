@@ -45,8 +45,11 @@ type Snapshot struct {
 	// in-memory representation of the MLP.
 	ID string `json:"-"`
 
+	// Alpha is the learning rate within the layer
+	Alpha float64 `json:"alpha"`
+
 	// Layers is the list of layers in the snapshot.
-	Layers map[string]*Layer `json: "layers"`
+	Layers map[string]*Layer `json:"layers"`
 }
 
 // NextSnapshotID returns the next canonical snapshot ID. If no snapshots have
@@ -63,7 +66,7 @@ func (mlp *MLPX) NextSnapshotID() string {
 }
 
 // MakeSnapshot creates a new, empty snapshot in the given MLPX object
-func (mlp *MLPX) MakeSnapshot(id string) error {
+func (mlp *MLPX) MakeSnapshot(id string, alpha float64) error {
 	if _, ok := mlp.Snapshots[id]; ok {
 		return fmt.Errorf("Snapshot with ID '%s' already exists", id)
 	}
@@ -71,6 +74,7 @@ func (mlp *MLPX) MakeSnapshot(id string) error {
 	mlp.Snapshots[id] = &Snapshot{
 		Parent: mlp,
 		ID:     id,
+		Alpha:  alpha,
 		Layers: make(map[string]*Layer),
 	}
 
@@ -78,8 +82,8 @@ func (mlp *MLPX) MakeSnapshot(id string) error {
 }
 
 // MustMakeSnapshot is a wrapper around MakeSnapshot which errors if it fails
-func (mlp *MLPX) MustMakeSnapshot(id string) {
-	err := mlp.MakeSnapshot(id)
+func (mlp *MLPX) MustMakeSnapshot(id string, alpha float64) {
+	err := mlp.MakeSnapshot(id, alpha)
 	if err != nil {
 		panic(err)
 	}
@@ -90,13 +94,13 @@ func (mlp *MLPX) MustMakeSnapshot(id string) {
 // snapshots, once the first has been defined, to guarantee that all snapshots
 // are isomorphic, which the spec requires.
 func (mlp *MLPX) MakeIsomorphicSnapshot(id, to string) error {
-	err := mlp.MakeSnapshot(id)
-	if err != nil {
-		return err
-	}
-
 	if _, ok := mlp.Snapshots[to]; !ok {
 		return fmt.Errorf("Specified snapshot '%s' does not exist", to)
+	}
+
+	err := mlp.MakeSnapshot(id, mlp.Snapshots[to].Alpha)
+	if err != nil {
+		return err
 	}
 
 	for layerid, layer := range mlp.Snapshots[to].Layers {
@@ -223,7 +227,7 @@ func (snapshot *Snapshot) SortedLayerIDs() []string {
 
 }
 
-// GetSuccessor returns the successor of a given snapshot, being the
+// Successor returns the successor of a given snapshot, being the
 // snapshot which occurs next after the specified one.
 func (snapshot *Snapshot) Successor(id string) (*Snapshot, error) {
 	mlp := snapshot.Parent
@@ -242,7 +246,7 @@ func (snapshot *Snapshot) Successor(id string) (*Snapshot, error) {
 	return nil, fmt.Errorf("no such snapshot '%s'", id)
 }
 
-// GetPredecessor returns the predecessor of a given snapshot, being the
+// Predecessor returns the predecessor of a given snapshot, being the
 // snapshot which occurs next after the specified one.
 func (snapshot *Snapshot) Predecessor(id string) (*Snapshot, error) {
 	mlp := snapshot.Parent

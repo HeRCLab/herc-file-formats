@@ -2,6 +2,7 @@
   "schema": ["mlpx", 0],
   "snapshots": {
    "0": {
+    "alpha": 0.1,
     "layers": {
      "input": {
       "successor": "hidden0",

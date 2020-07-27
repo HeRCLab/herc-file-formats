@@ -7,6 +7,7 @@
 		fprintf(stderr, "TEST FAILED (%s, %s:L%i): ", __func__, __FILE__, __LINE__); \
 		fprintf(stderr, fmt, __VA_ARGS__); \
 		fprintf(stderr, "\n"); \
+		fprintf(stderr, "last error was: %s\n", MLPXGetError()); \
 		exit(1); \
 	} while(0);
 
