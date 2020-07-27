@@ -89,6 +89,23 @@ These keys are all optional, to support a variety of different use cases. For
 example, an mlpx file used to initialize common layer weights and biases might
 omit the `activation`, `deltas`, and `biases` fields.
 
+Although the `activation_function` field is an arbitrary string,
+implementations **should** use one of the following values, and the
+corresponding defined meaning below. Using a consistent set of values for
+this purpose makes it easier to reliably deserialize MLPX networks.
+
+* `relu` -- should be used to indicate that the ReLU activation function should
+  be used
+* `sigmoid` -- should be used to indicate that the Sigmoid activation function
+  should be used
+* `identity` -- should be used to indicate that no activation function should
+  be used, the raw output should be used.
+
+An empty `activation_function` value **should** be treated the same as
+`identity`. How individual implementations handle unknown activation functions
+is left to those implementations.
+
+
 ## Rationale
 
 MLPX is intended to be as straightforward as possible to implement for a
