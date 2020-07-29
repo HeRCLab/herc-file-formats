@@ -323,8 +323,16 @@ type Layer struct {
 // EnsureWeights guarantees that the weights matrix for the layer is non-nil
 func (layer *Layer) EnsureWeights() {
 	if layer.Weights == nil {
-		w := make([]float64, layer.Neurons*layer.Parent.Layers[layer.Predecessor].Neurons)
-		layer.Weights = &w
+		pred, ok := layer.Parent.Layers[layer.Predecessor]
+		if ok {
+			w := make([]float64, layer.Neurons*pred.Neurons)
+			layer.Weights = &w
+		} else {
+			// this is the input layer, so the weights don't really
+			// matter
+			w := make([]float64, layer.Neurons)
+			layer.Weights = &w
+		}
 	}
 }
 
