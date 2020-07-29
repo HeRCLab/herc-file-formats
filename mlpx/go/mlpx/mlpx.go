@@ -171,6 +171,15 @@ func (mlp *MLPX) Initializer() (*Snapshot, error) {
 	return mlp.Snapshots[ids[0]], nil
 }
 
+// Latest returns the most recent snapshot, if any
+func (mlp *MLPX) Latest() (*Snapshot, error) {
+	ids := mlp.SortedSnapshotIDs()
+	if len(ids) < 1 {
+		return nil, fmt.Errorf("No snapshots available")
+	}
+	return mlp.Snapshots[ids[len(ids)-1]], nil
+}
+
 // SortedLayerIDs returns a list of layer IDs in sorted order. IDs are sorted
 // by their topology.
 //
