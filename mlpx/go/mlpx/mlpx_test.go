@@ -53,6 +53,92 @@ func getTestMLPX1() *MLPX {
 	return m
 }
 
+func TestDiff1(t *testing.T) {
+	m1 := getTestMLPX1()
+	m2 := getTestMLPX1()
+
+	if len(m1.Diff(m2, "", 0.0001)) != 0 {
+		t.Errorf("Identical MLPX have differences")
+	}
+
+}
+
+func TestDiff2(t *testing.T) {
+	m1 := getTestMLPX1()
+	m2 := getTestMLPX1()
+
+	m2.MakeIsomorphicSnapshot("1", "0")
+
+	if len(m1.Diff(m2, "", 0.0001)) == 0 {
+		t.Errorf("MLPX with different snapshots have no differences")
+	}
+}
+
+func TestDiff3(t *testing.T) {
+	m1 := getTestMLPX1()
+	m2 := getTestMLPX1()
+
+	m2.Snapshots["0"].Layers["input"].Neurons = 500
+
+	if len(m1.Diff(m2, "", 0.0001)) == 0 {
+		t.Errorf("MLPX with different neuron counts have no differences")
+	}
+}
+
+func TestDiff4(t *testing.T) {
+	m1 := getTestMLPX1()
+	m2 := getTestMLPX1()
+
+	m1.Snapshots["0"].Layers["output"].EnsureWeights()
+	m2.Snapshots["0"].Layers["output"].EnsureWeights()
+
+	(*m1.Snapshots["0"].Layers["output"].Weights)[0] = 1
+	(*m2.Snapshots["0"].Layers["output"].Weights)[0] = 1.1
+
+	if len(m1.Diff(m2, "", 0.0001)) == 0 {
+		t.Errorf("MLPX with different weights have no differences")
+	}
+
+	if len(m1.Diff(m2, "", 0.5)) != 0 {
+		t.Errorf("Epsilon is not handled correctly when comparing weights")
+	}
+}
+
+func TestInitializerLatest(t *testing.T) {
+	m := getTestMLPX1()
+
+	m.MakeIsomorphicSnapshot("1", "0")
+	m.MakeIsomorphicSnapshot("2", "0")
+	m.MakeIsomorphicSnapshot("3", "0")
+
+	init, err := m.Initializer()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	final, err := m.Latest()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if init.ID != "0" {
+		t.Errorf("Incorrect initializer ID detected")
+	}
+
+	if final.ID != "3" {
+		t.Errorf("Incorrect latest ID detected")
+	}
+
+	m.MakeIsomorphicSnapshot("initializer", "0")
+	init, err = m.Initializer()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if init.ID != "initializer" {
+		t.Errorf("Incorrect initializer ID detected")
+	}
+}
+
 func TestEndcodeDecode(t *testing.T) {
 
 	m1, err := FromJSON([]byte(getTestJSON1()))

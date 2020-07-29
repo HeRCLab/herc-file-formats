@@ -5,6 +5,7 @@ package mlpx
 
 import (
 	"fmt"
+	"math"
 	"sort"
 	"strconv"
 )
@@ -30,6 +31,71 @@ func MakeMLPX() *MLPX {
 	}
 }
 
+// Diff returns a list of differences between the given MLPX objects.
+//
+// The indent parameter will be used to indent any hierarchical data, if
+// applicable. The suggested value is "\t".
+//
+// The epsilon parameter defines the maximum difference of two floating point
+// numbers before this algorithm considers them to be different. This should
+// usually be a very small number.
+func (mlp *MLPX) Diff(other *MLPX, indent string, epsilon float64) []string {
+	diffs := []string{}
+
+	// find all common snapshot IDs
+	commonSnaps := make(map[string]bool)
+	for _, snapid := range mlp.SortedSnapshotIDs() {
+		_, ok := other.Snapshots[snapid]
+		if ok {
+			commonSnaps[snapid] = true
+		} else {
+			// snapshot in mlp but not other
+			diffs = append(diffs,
+				fmt.Sprintf("base MLPX has snapshot ID '%s', but other MLPX does not", snapid))
+		}
+	}
+	for _, snapid := range other.SortedSnapshotIDs() {
+		_, ok := mlp.Snapshots[snapid]
+		if ok {
+			commonSnaps[snapid] = true
+		} else {
+			// snapshot in other but not mlp
+			diffs = append(diffs,
+				fmt.Sprintf("other MLPX has snapshot ID '%s', but base MLPX does not", snapid))
+		}
+	}
+
+	// get a nicely sorted list of common snapshot IDs
+	commonList := make([]string, 0)
+	for k := range commonSnaps {
+		commonList = append(commonList, k)
+	}
+	commonList = SortSnapshotIDs(commonList)
+
+	// now recurse into the common snapshots
+	for _, snapid := range commonList {
+		// find the differences
+		baseSnap := mlp.Snapshots[snapid]
+		otherSnap := other.Snapshots[snapid]
+		snapDiff := baseSnap.Diff(otherSnap, indent, epsilon)
+
+		// apply indent
+		for i, v := range snapDiff {
+			snapDiff[i] = fmt.Sprintf("%s%s", indent, v)
+		}
+
+		// fold into the main diff list
+		if len(snapDiff) > 0 {
+			diffs = append(diffs,
+				fmt.Sprintf("Snapshot ID '%s' differs", snapid))
+			diffs = append(diffs, snapDiff...)
+		}
+
+	}
+
+	return diffs
+}
+
 // Snapshot represents a single snapshot definition
 type Snapshot struct {
 
@@ -50,6 +116,81 @@ type Snapshot struct {
 
 	// Layers is the list of layers in the snapshot.
 	Layers map[string]*Layer `json:"layers"`
+}
+
+// Diff returns a list of differences between the given Snapshot objects.
+func (snapshot *Snapshot) Diff(other *Snapshot, indent string, epsilon float64) []string {
+	diffs := []string{}
+
+	// compare IDs
+	if snapshot.ID != other.ID {
+		diffs = append(diffs,
+			fmt.Sprintf("IDs do not match: base '%s', other '%s'", snapshot.ID, other.ID))
+	}
+
+	// compare Alpha values
+	if math.Abs(snapshot.Alpha-other.Alpha) > epsilon {
+		diffs = append(diffs,
+			fmt.Sprintf("Base snapshot Alpha %f does not match other Alpha %f",
+				snapshot.Alpha, other.Alpha))
+	}
+
+	// find all layer IDs in common between the snapshots
+	commonLayers := make(map[string]bool)
+	for _, layerid := range snapshot.SortedLayerIDs() {
+		_, ok := other.Layers[layerid]
+		if ok {
+			commonLayers[layerid] = true
+		} else {
+			// layer in snapshot but not other
+			diffs = append(diffs,
+				fmt.Sprintf("base snapshot has layer ID '%s', but other snapshot does not", layerid))
+		}
+	}
+	for _, layerid := range other.SortedLayerIDs() {
+		_, ok := snapshot.Layers[layerid]
+		if ok {
+			commonLayers[layerid] = true
+		} else {
+			// layer in other but not snapshot
+			diffs = append(diffs,
+				fmt.Sprintf("other snapshot has layer ID '%s', but base snapshot does not", layerid))
+		}
+	}
+
+	// We cannot sort this as nicely, since layers cannot be sorted outside
+	// of the context of a specific snapshot. Instead we sort one of them
+	// and then remove all the indices that aren't in the common list. This
+	// does mean that the layer IDs will only be sorted within the context
+	// of the base snapshot.
+	commonList := make([]string, 0)
+	for _, v := range snapshot.SortedLayerIDs() {
+		_, ok := commonLayers[v]
+		if ok {
+			commonList = append(commonList, v)
+		}
+	}
+
+	// Now we recurse into the common layers
+	for _, layerid := range commonList {
+		baseLayer := snapshot.Layers[layerid]
+		otherLayer := other.Layers[layerid]
+		layerDiff := baseLayer.Diff(otherLayer, indent, epsilon)
+
+		// apply indent
+		for i, v := range layerDiff {
+			layerDiff[i] = fmt.Sprintf("%s%s", indent, v)
+		}
+
+		// fold into main diff list
+		if len(layerDiff) > 0 {
+			diffs = append(diffs,
+				fmt.Sprintf("Layer ID '%s' differs", layerid))
+			diffs = append(diffs, layerDiff...)
+		}
+	}
+
+	return diffs
 }
 
 // NextSnapshotID returns the next canonical snapshot ID. If no snapshots have
@@ -122,16 +263,9 @@ func (mlp *MLPX) MustMakeIsomorphicSnapshot(id, to string) {
 	}
 }
 
-// SortedSnapshotIDs returns the list of snapshot IDs, sorted in the canonical
-// order for MLPX. That is, the "initializer" snapshot sorts before everything
-// else, and numeric snapshot IDs are sorted by numeric value, rather than
-// by string comparison"
-func (mlp *MLPX) SortedSnapshotIDs() []string {
-	snapids := make([]string, 0)
-	for k := range mlp.Snapshots {
-		snapids = append(snapids, k)
-	}
-
+// SortSnapshotIDs applies the canonical sorting algorithm for snapshots to
+// the given list of snapshot IDs
+func SortSnapshotIDs(snapids []string) []string {
 	sort.Slice(snapids, func(i, j int) bool {
 		if snapids[i] == "initializer" {
 			return true
@@ -156,8 +290,21 @@ func (mlp *MLPX) SortedSnapshotIDs() []string {
 		} else { //ierr != nil && jerr != nil
 			return snapids[i] < snapids[j]
 		}
-
 	})
+	return snapids
+}
+
+// SortedSnapshotIDs returns the list of snapshot IDs, sorted in the canonical
+// order for MLPX. That is, the "initializer" snapshot sorts before everything
+// else, and numeric snapshot IDs are sorted by numeric value, rather than
+// by string comparison"
+func (mlp *MLPX) SortedSnapshotIDs() []string {
+	snapids := make([]string, 0)
+	for k := range mlp.Snapshots {
+		snapids = append(snapids, k)
+	}
+
+	snapids = SortSnapshotIDs(snapids)
 
 	return snapids
 }
@@ -318,6 +465,93 @@ type Layer struct {
 	// ActivationFunction is the human-readable activation function used by
 	// the layer
 	ActivationFunction string `json:"activation_function"`
+}
+
+// header will only be shown if there is a difference
+func diffList(base, other *[]float64, indent string, epsilon float64, header string) []string {
+	if base != nil && other == nil {
+		return []string{header,
+			fmt.Sprintf("%sOther list is nil, base is non-nil", indent),
+		}
+	}
+
+	if base == nil && other != nil {
+		return []string{header,
+			fmt.Sprintf("%sBase list is nil, other is non-nil", indent),
+		}
+	}
+
+	if base == nil && other == nil {
+		return []string{}
+	}
+
+	if len(*base) != len(*other) {
+		return []string{header,
+			fmt.Sprintf("%sLists are of different lengths: base %d, other %d", indent, len(*base), len(*other))}
+	}
+
+	ndiff := 0
+	averagediff := 0.0
+	for i, v := range *base {
+		diff := math.Abs(v - (*other)[i])
+		if diff > epsilon {
+			ndiff++
+			averagediff += diff
+		}
+	}
+
+	if ndiff > 0 {
+		averagediff = averagediff / float64(ndiff)
+		return []string{header,
+			fmt.Sprintf("%s%d values differ, with an average difference of %f", indent, ndiff, averagediff)}
+	}
+
+	return []string{}
+}
+
+// Diff returns a list of differences between the two given layers.
+func (layer *Layer) Diff(other *Layer, indent string, epsilon float64) []string {
+	diffs := []string{}
+
+	// compare IDs
+	if layer.ID != other.ID {
+		diffs = append(diffs,
+			fmt.Sprintf("IDs do not match: base '%s', other '%s'", layer.ID, other.ID))
+	}
+
+	// compare predecessors
+	if layer.Predecessor != other.Predecessor {
+		diffs = append(diffs,
+			fmt.Sprintf("Predecessors do not match: base '%s', other '%s'", layer.Predecessor, other.Predecessor))
+	}
+
+	// compare Successors
+	if layer.Successor != other.Successor {
+		diffs = append(diffs,
+			fmt.Sprintf("Successors do not match: base '%s', other '%s'", layer.Successor, other.Successor))
+	}
+
+	// compare Neurons
+	if layer.Neurons != other.Neurons {
+		diffs = append(diffs,
+			fmt.Sprintf("Neurons do not match: base '%d', other '%d'", layer.Neurons, other.Neurons))
+	}
+
+	// compare lists
+	diffs = append(diffs, diffList(layer.Weights, other.Weights, indent, epsilon, "Weight matrices do not match")...)
+	diffs = append(diffs, diffList(layer.Outputs, other.Outputs, indent, epsilon, "Output matrices do not match")...)
+	diffs = append(diffs, diffList(layer.Activations, other.Activations, indent, epsilon, "Activation matrices do not match")...)
+	diffs = append(diffs, diffList(layer.Deltas, other.Deltas, indent, epsilon, "Delta matrices do not match")...)
+	diffs = append(diffs, diffList(layer.Biases, other.Biases, indent, epsilon, "Bias matrices do not match")...)
+
+	if layer.ActivationFunction != other.ActivationFunction {
+		diffs = append(diffs, fmt.Sprintf(
+			"Base activation function '%s' does not match other activation function '%s'",
+			layer.ActivationFunction,
+			other.ActivationFunction))
+	}
+
+	return diffs
 }
 
 // EnsureWeights guarantees that the weights matrix for the layer is non-nil
