@@ -67,7 +67,7 @@ func TestDiff2(t *testing.T) {
 	m1 := getTestMLPX1()
 	m2 := getTestMLPX1()
 
-	m2.MakeIsomorphicSnapshot("1", "0")
+	m2.MustMakeIsomorphicSnapshot("1", "0")
 
 	if len(m1.Diff(m2, "", 0.0001)) == 0 {
 		t.Errorf("MLPX with different snapshots have no differences")
@@ -107,9 +107,9 @@ func TestDiff4(t *testing.T) {
 func TestInitializerLatest(t *testing.T) {
 	m := getTestMLPX1()
 
-	m.MakeIsomorphicSnapshot("1", "0")
-	m.MakeIsomorphicSnapshot("2", "0")
-	m.MakeIsomorphicSnapshot("3", "0")
+	m.MustMakeIsomorphicSnapshot("1", "0")
+	m.MustMakeIsomorphicSnapshot("2", "0")
+	m.MustMakeIsomorphicSnapshot("3", "0")
 
 	init, err := m.Initializer()
 	if err != nil {
@@ -129,7 +129,7 @@ func TestInitializerLatest(t *testing.T) {
 		t.Errorf("Incorrect latest ID detected")
 	}
 
-	m.MakeIsomorphicSnapshot("initializer", "0")
+	m.MustMakeIsomorphicSnapshot("initializer", "0")
 	init, err = m.Initializer()
 	if err != nil {
 		t.Fatal(err)
