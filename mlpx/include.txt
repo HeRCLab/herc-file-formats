@@ -1,0 +1,10 @@
+# this file is included into all of the manual pages generated
+
+[SEE ALSO]
+mlpx-new(1), mlpx-diff(1), mlpx-validate(1), mlpx(3), mlpx(5)
+
+[COPYRIGHT]
+Jason Bakos, Philip Conrad, Charles Daniels, All Rights Reserved.
+
+[UPSTREAM]
+https://github.com/HeRCLab/herc-file-formats

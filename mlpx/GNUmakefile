@@ -3,6 +3,12 @@ include ./opinionated.mk
 GOSRC=$(shell find . -iname "*.go" )
 PREFIX=/usr/local
 
+BUILD_MAN_PAGES=build/man/3/mlpx.3 build/man/5/mlpx.5 build/man/1/mlpx.1 build/man/1/mlpx-new.1 build/man/1/mlpx-validate.1 build/man/1/mlpx-diff.1
+BUILD_BINARIES=build/bin/mlpx build/bin/mlpx-config
+BUILD_INCLUDES=build/include/mlpx/mlpx.h
+BUILD_LIBS=build/lib/libmlpx.so build/lib/libmlpx.a
+BUILD_EVERYTHING=$(BUILD_MAN_PAGES) $(BUILD_BINARIES) $(BUILD_INCLUDES) $(BUILD_LIBS)
+
 test:
 > $(MAKE) -C ./go test
 > $(MAKE) -C ./c test
@@ -14,28 +20,63 @@ lint:
 
 
 builddirs:
-> mkdir -p ./build
 > mkdir -p ./build/bin
-> mkdir -p ./build/man
+> mkdir -p ./build/man/1
 > mkdir -p ./build/man/3
 > mkdir -p ./build/man/5
+> mkdir -p ./build/lib
+> mkdir -p ./build/include/mlpx
 .PHONY: builddirs
 
 build/bin/mlpx: $(GOSRC) go.mod builddirs
-> go build -o $@ ./cmd/mlpx/main.go 
+> go build -o $@ ./cmd/mlpx/main.go
 
-build/man/3/%.3: doc/3/%.md
+build/bin/mlpx-config: ./cmd/mlpx-config/mlpx-config
+> cp $< $@
+> chmod +x $@
+.PHONY: build/bin/mlpx-config
+
+build/man/3/%.3: doc/3/%.md builddirs
 > ronn < $< > $@
 
-build/man/5/%.5: doc/5/%.md
+build/man/5/%.5: doc/5/%.md builddirs
 > ronn < $< > $@
 
-build: build/bin/mlpx build/man/3/mlpx.3 build/man/5/mlpx.5
+build/man/1/mlpx.1: ./build/bin/mlpx builddirs
+> help2man --include=include.txt --no-info --no-discard-stderr $< > "$@"
+
+build/man/1/mlpx-new.1: ./build/bin/mlpx builddirs
+> help2man --include=include.txt --no-info --no-discard-stderr "$< new" > "$@"
+
+build/man/1/mlpx-diff.1: ./build/bin/mlpx builddirs
+> help2man --include=include.txt --no-info --no-discard-stderr "$< diff" > "$@"
+
+build/man/1/mlpx-validate.1: ./build/bin/mlpx builddirs
+> help2man --include=include.txt --no-info --no-discard-stderr "$< validate" > "$@"
+
+build/lib/libmlpx.so: builddirs
+> $(MAKE) -C ./c mlpx.so
+> cp ./c/mlpx.so $@
+.PHONY: build/lib/libmlpx.so
+
+build/lib/libmlpx.a: builddirs
+> $(MAKE) -C ./c mlpx.a
+> cp ./c/mlpx.a $@
+.PHONY: build/lib/libmlpx.a
+
+build/include/mlpx/mlpx.h: builddirs
+> $(MAKE) -C ./c mlpx.h
+> cp ./c/mlpx.h $@
+.PHONY: build/lib.mlpx.h
+
+build: $(BUILD_EVERYTHING)
 .PHONY: build
 
 install: build
 > cp -r ./build/bin/* $(PREFIX)/bin/
 > cp -r ./build/man/* $(PREFIX)/man/
+> cp -r ./build/lib/* $(PREFIX)/lib/
+> cp -r ./build/include/* $(PREFIX)/include/
 .PHONY: install
 
 clean:

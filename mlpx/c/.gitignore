@@ -2,3 +2,4 @@
 *.o
 mlpx.h
 test/mlpx.h
+*.a
