@@ -59,6 +59,12 @@ freed by the caller as appropriate.
 	Closes a previously opened MLPX handle, allowing it's memory to be
 	garbaged collected on the Go side.
 
+* **int MLPXIsomorphicDuplicate(int sourceHandle, int destHandle, char\* snapid);**:
+	Create a topologically identical duplicate of the given MLPX with a new
+	handle. The created MLPX will have a single snapshot with the specified
+	snapshot ID. Note that the Alpha value and all layer fields will be
+	uninitialized in the duplicated MLPX.
+
 * **int MLPXGetNumSnapshots(int handle, int\* snapc);**:
 	Retrieves the number of snapshots currently stored in an MLPX handle.
 

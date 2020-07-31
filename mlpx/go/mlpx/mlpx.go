@@ -31,6 +31,43 @@ func MakeMLPX() *MLPX {
 	}
 }
 
+// IsomorphicDuplicate creates a new MLPX object with a single snapshot with
+// the id snapid, which is topologically identical to the source MLPX object.
+//
+// No snapshot fields are initialized in the duplicate.
+//
+// The snapshots alpha value will be initialized to 0.0.
+func (mlp *MLPX) IsomorphicDuplicate(snapid string) (*MLPX, error) {
+	dup := MakeMLPX()
+
+	err := dup.MakeSnapshot(snapid, 0.0)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(mlp.SortedSnapshotIDs()) == 0 {
+		return dup, nil
+	}
+
+	sourceSnapID := mlp.SortedSnapshotIDs()[0]
+	sourceSnap := mlp.Snapshots[sourceSnapID]
+
+	for _, layerid := range sourceSnap.SortedLayerIDs() {
+		sourceLayer := sourceSnap.Layers[layerid]
+		err := dup.Snapshots[snapid].MakeLayer(
+			layerid,
+			sourceLayer.Neurons,
+			sourceLayer.Predecessor,
+			sourceLayer.Successor)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return dup, nil
+}
+
 // Diff returns a list of differences between the given MLPX objects.
 //
 // The indent parameter will be used to indent any hierarchical data, if

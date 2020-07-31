@@ -323,3 +323,25 @@ func TestNextSnapshotID(t *testing.T) {
 		t.Errorf("expected next snapshot ID to be '1', but was '%s'", id)
 	}
 }
+
+func TestIsomorphicDuplicate(t *testing.T) {
+	m := getTestMLPX1()
+
+	dup, err := m.IsomorphicDuplicate("0")
+	if err != nil {
+		t.Error(err)
+	}
+
+	m.Snapshots["0"].Layers["hidden0"].Weights = nil
+	m.Snapshots["0"].Layers["output"].Outputs = nil
+	m.Snapshots["0"].Layers["hidden0"].ActivationFunction = ""
+	m.Snapshots["0"].Alpha = 0
+
+	diff := m.Diff(dup, "\t", 0.0001)
+	if len(diff) > 0 {
+		for _, d := range diff {
+			t.Log(d)
+		}
+		t.Errorf("Original and duplicated MLPXes differ")
+	}
+}

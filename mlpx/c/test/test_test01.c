@@ -7,10 +7,20 @@
 
 int main(int argc, char** argv) {
 	int handle, snapc, layerc, layeridx, neuronc, initializer, pred, succ;
+	int dup, n1, n2;
 	char* layerid;
 	char* funct;
 	double weight, output, activation, delta, bias, alpha;
 	should_equal(MLPXOpen("test1.mlpx", &handle), 0);
+
+
+	should_equal(MLPXIsomorphicDuplicate(handle, &dup, "dupe"), 0);
+	should_equal(MLPXGetNumSnapshots(handle, &n1), 0);
+	should_equal(MLPXGetNumSnapshots(dup, &n2), 0);
+	should_equal(n1, n2);
+	should_equal(MLPXSnapshotGetNumLayers(handle, 0, &n1), 0);
+	should_equal(MLPXSnapshotGetNumLayers(dup, 0, &n2), 0);
+	should_equal(n1, n2);
 
 	should_equal(MLPXGetNumSnapshots(handle, &snapc), 0);
 	should_equal(snapc, 1);
@@ -72,5 +82,7 @@ int main(int argc, char** argv) {
 	should_equal(MLPXSnapshotGetAlpha(handle, 0, &alpha), 0);
 	should_equal_epsilon(alpha, 0.2, 0.0001);
 
+
 	should_equal(MLPXClose(handle), 0);
+	should_equal(MLPXClose(dup), 0);
 }
