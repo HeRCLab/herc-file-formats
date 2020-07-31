@@ -237,7 +237,7 @@ func (mlp *MLPX) NextSnapshotID() string {
 	snapids := mlp.SortedSnapshotIDs()
 
 	if len(snapids) == 0 {
-		return "intializer"
+		return "initializer"
 	}
 
 	return fmt.Sprintf("%d", len(snapids))

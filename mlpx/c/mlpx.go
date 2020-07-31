@@ -378,8 +378,8 @@ func MLPXLayerSetWeight(handle, snapshotIndex, layerIndex, subscript C.int, valu
 
 	layer.EnsureWeights()
 
-	if subscript < 0 || subscript > C.int(len(*layer.Weights)) {
-		lastError = fmt.Sprintf("subscript '%s' out of bounds for layer ID '%s' weights", subscript, layer.ID)
+	if subscript < 0 || subscript >= C.int(len(*layer.Weights)) {
+		lastError = fmt.Sprintf("subscript '%d' out of bounds for layer ID '%s' weights", subscript, layer.ID)
 		return 1
 	}
 
@@ -399,8 +399,8 @@ func MLPXLayerGetWeight(handle, snapshotIndex, layerIndex, subscript C.int, valu
 		return 1
 	}
 
-	if subscript < 0 || subscript > C.int(len(*layer.Weights)) {
-		lastError = fmt.Sprintf("subscript '%s' out of bounds for layer ID weights'%s'", subscript, layer.ID)
+	if subscript < 0 || subscript >= C.int(len(*layer.Weights)) {
+		lastError = fmt.Sprintf("subscript '%d' out of bounds for layer ID weights'%s'", subscript, layer.ID)
 		return 1
 	}
 
@@ -418,7 +418,7 @@ func MLPXLayerSetOutput(handle, snapshotIndex, layerIndex, subscript C.int, valu
 	layer.EnsureOutputs()
 
 	if subscript < 0 || subscript >= C.int(len(*layer.Outputs)) {
-		lastError = fmt.Sprintf("subscript '%s' out of bounds for layer ID outputs'%s'", subscript, layer.ID)
+		lastError = fmt.Sprintf("subscript '%d' out of bounds for layer ID outputs'%s'", subscript, layer.ID)
 		return 1
 	}
 
@@ -439,7 +439,7 @@ func MLPXLayerGetOutput(handle, snapshotIndex, layerIndex, subscript C.int, valu
 	}
 
 	if subscript < 0 || subscript >= C.int(len(*layer.Outputs)) {
-		lastError = fmt.Sprintf("subscript '%s' out of bounds for layer ID outputs'%s'", subscript, layer.ID)
+		lastError = fmt.Sprintf("subscript '%d' out of bounds for layer ID outputs'%s'", subscript, layer.ID)
 		return 1
 	}
 
@@ -457,7 +457,7 @@ func MLPXLayerSetActivation(handle, snapshotIndex, layerIndex, subscript C.int, 
 	layer.EnsureActivations()
 
 	if subscript < 0 || subscript >= C.int(len(*layer.Activations)) {
-		lastError = fmt.Sprintf("subscript '%s' out of bounds for layer ID activation '%s'", subscript, layer.ID)
+		lastError = fmt.Sprintf("subscript '%d' out of bounds for layer ID activation '%s'", subscript, layer.ID)
 		return 1
 	}
 
@@ -478,7 +478,7 @@ func MLPXLayerGetActivation(handle, snapshotIndex, layerIndex, subscript C.int, 
 	}
 
 	if subscript < 0 || subscript >= C.int(len(*layer.Activations)) {
-		lastError = fmt.Sprintf("subscript '%s' out of bounds for layer ID activations '%s'", subscript, layer.ID)
+		lastError = fmt.Sprintf("subscript '%d' out of bounds for layer ID activations '%s'", subscript, layer.ID)
 		return 1
 	}
 
@@ -496,7 +496,7 @@ func MLPXLayerSetDelta(handle, snapshotIndex, layerIndex, subscript C.int, value
 	layer.EnsureDeltas()
 
 	if subscript < 0 || subscript >= C.int(len(*layer.Deltas)) {
-		lastError = fmt.Sprintf("subscript '%s' out of bounds for layer ID delta '%s'", subscript, layer.ID)
+		lastError = fmt.Sprintf("subscript '%d' out of bounds for layer ID delta '%s'", subscript, layer.ID)
 		return 1
 	}
 
@@ -517,7 +517,7 @@ func MLPXLayerGetDelta(handle, snapshotIndex, layerIndex, subscript C.int, value
 	}
 
 	if subscript < 0 || subscript >= C.int(len(*layer.Deltas)) {
-		lastError = fmt.Sprintf("subscript '%s' out of bounds for layer ID deltas '%s'", subscript, layer.ID)
+		lastError = fmt.Sprintf("subscript '%d' out of bounds for layer ID deltas '%s'", subscript, layer.ID)
 		return 1
 	}
 
@@ -535,7 +535,7 @@ func MLPXLayerSetBias(handle, snapshotIndex, layerIndex, subscript C.int, value 
 	layer.EnsureBiases()
 
 	if subscript < 0 || subscript >= C.int(len(*layer.Biases)) {
-		lastError = fmt.Sprintf("subscript '%s' out of bounds for layer ID bias '%s'", subscript, layer.ID)
+		lastError = fmt.Sprintf("subscript '%d' out of bounds for layer ID bias '%s'", subscript, layer.ID)
 		return 1
 	}
 
@@ -556,7 +556,7 @@ func MLPXLayerGetBias(handle, snapshotIndex, layerIndex, subscript C.int, value 
 	}
 
 	if subscript < 0 || subscript >= C.int(len(*layer.Biases)) {
-		lastError = fmt.Sprintf("subscript '%s' out of bounds for layer ID biases '%s'", subscript, layer.ID)
+		lastError = fmt.Sprintf("subscript '%d' out of bounds for layer ID biases '%s'", subscript, layer.ID)
 		return 1
 	}
 
