@@ -42,6 +42,22 @@ func MLPXOpen(path *C.char, handle *C.int) C.int {
 	return 0
 }
 
+//export MLPXSave
+func MLPXSave(handle C.int, path *C.char) C.int {
+	mlp := getMLP(handle)
+	if mlp == nil {
+		return 1
+	}
+
+	err := mlp.WriteJSON(C.GoString(path))
+	if err != nil {
+		lastError = fmt.Sprintf("%s", err)
+		return 1
+	}
+
+	return 0
+}
+
 //export MLPXClose
 func MLPXClose(handle C.int) C.int {
 	if _, ok := handles[handle]; ok {

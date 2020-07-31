@@ -55,6 +55,10 @@ freed by the caller as appropriate.
 	handle if appropriate. The handle may be invalid if an error is
 	encountered.
 
+* **int MLPXSave(int handle, char\* path);**:
+	Save the MLPX object referenced by the handle to the specified path,
+	overwriting it if it exists already.
+
 * **int MLPXClose(int handle);**:
 	Closes a previously opened MLPX handle, allowing it's memory to be
 	garbaged collected on the Go side.
