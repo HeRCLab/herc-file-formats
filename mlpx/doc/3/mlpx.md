@@ -65,6 +65,9 @@ freed by the caller as appropriate.
 	snapshot ID. Note that the Alpha value and all layer fields will be
 	uninitialized in the duplicated MLPX.
 
+* **int MLPXNextSnapshotID(int handle, char\*\* nextid);**:
+	Returns the next canonical snapshot ID after the most recent.
+
 * **int MLPXGetNumSnapshots(int handle, int\* snapc);**:
 	Retrieves the number of snapshots currently stored in an MLPX handle.
 

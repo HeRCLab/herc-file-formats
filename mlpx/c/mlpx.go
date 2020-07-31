@@ -86,6 +86,17 @@ func MLPXIsomorphicDuplicate(sourceHandle C.int, destHandle *C.int, snapid *C.ch
 
 }
 
+//export MLPXNextSnapshotID
+func MLPXNextSnapshotID(handle C.int, nextid **C.char) C.int {
+	mlp := getMLP(handle)
+	if mlp == nil {
+		return 1
+	}
+
+	*nextid = C.CString(mlp.NextSnapshotID())
+	return 0
+}
+
 //export MLPXGetNumSnapshots
 func MLPXGetNumSnapshots(handle C.int, snapc *C.int) C.int {
 	mlp := getMLP(handle)

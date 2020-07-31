@@ -10,6 +10,7 @@ int main(int argc, char** argv) {
 	int dup, n1, n2;
 	char* layerid;
 	char* funct;
+	char* nextid;
 	double weight, output, activation, delta, bias, alpha;
 	should_equal(MLPXOpen("test1.mlpx", &handle), 0);
 
@@ -24,6 +25,9 @@ int main(int argc, char** argv) {
 
 	should_equal(MLPXGetNumSnapshots(handle, &snapc), 0);
 	should_equal(snapc, 1);
+
+	should_equal(MLPXNextSnapshotID(handle, &nextid), 0);
+	str_should_equal(nextid, "1");
 
 	should_equal(MLPXSnapshotGetNumLayers(handle, 0, &layerc), 0);
 	should_equal(layerc, 3);
