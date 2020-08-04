@@ -7,7 +7,7 @@ build: build-mlpx build-wavegen
 
 builddir:
 > mkdir -p ./build
-.pHONY: builddir
+.PHONY: builddir
 
 build-mlpx: builddir
 > $(MAKE) -C ./mlpx build
