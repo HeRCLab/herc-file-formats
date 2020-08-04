@@ -1,5 +1,10 @@
 #!/bin/sh
 
+echo "This script bricked my laptop the last time I ran it, and I have not figured out why yet."
+echo "You should not run this script unless you really know what you're doing."
+echo "-- Charles"
+exit 1
+
 set -e
 set -u
 set -x
