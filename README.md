@@ -4,6 +4,21 @@ This repository contains specifications and implementations for bespoke file
 formats created for the HeRC lab, or for file formats we use in our work that
 don't have good quality existing public implementations.
 
+## How To Install
+
+Because of the nature of this repository, all tools and libraries are usually
+installed as a single bundle. However, check the documentation for each
+sub-project, many can be installed independently of each other if you so desire
+
+Usually, downloading the latest release as pre-compiled binaries from the
+GitHub repository is preferred.
+
+Otherwise, you can run `make build && sudo make install`.
+
+The `./build_release.sh` script can be used to generate a `.deb` file.
+
+Check each sub-project for dependencies.
+
 ## Structure
 
 Each directory is a separate file format. Directories should be named after
