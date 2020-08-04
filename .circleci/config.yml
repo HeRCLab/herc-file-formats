@@ -20,9 +20,6 @@ jobs:
       - run: go get -u golang.org/x/lint/golint
       - run: go get -u github.com/gordonklaus/ineffassign
       - run: go get -u github.com/kisielk/errcheck
-      - run: uname -a
-      - run: cat /etc/os-release
-      - run: make --version
       - run: make clean
       - run: make ci
       - run: sh -c 'GOPROXY="https://proxy.golang.org" GO111MODULE=on go get "github.com/herclab/herc-file-formats/wavegen" || true'
