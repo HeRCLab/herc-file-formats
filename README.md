@@ -41,6 +41,7 @@ repository used for building or CI.
 |-|-|-|-|-|
 | [TNX (Trivial Network eXchange)](./tnx) | unreleased | on-hold | Bespoke | Format for representing compute graphs, with a focus on neurual networks. |
 | [MLPX (MLP eXchange)](./mlpx) | unreleased | in-progress | Bespoke | Portable format for checkpointing MLP networks. |
+| [Wavegen](./wavegen) | 0.0.3 | in-progress | Bespoke  | Wave generation tool & portable format for exchanging such waves. |
 
 
 *Current Version* should be either "unreleased", for formats which have no
@@ -74,7 +75,5 @@ fold" of this repo. These formats were created before this repo.
 	* `hif1`
 	* `hif8`
 * `herc-imgtool` itself
-* The [wavegen](https://github.com/HeRCLab/wavegen) specification, library, and
-  related CLI tool.
 
 

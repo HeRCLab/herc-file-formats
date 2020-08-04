@@ -1,0 +1,10 @@
+# this file is included into all of the manual pages generated
+
+[SEE ALSO]
+wavegen(1), wavegen-view(1), wavegen-generate(1), wavegen(4)
+
+[COPYRIGHT]
+Jason Bakos, Philip Conrad, Charles Daniels, All Rights Reserved.
+
+[UPSTREAM]
+https://github.com/HeRCLab/wavegen
