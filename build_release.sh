@@ -1,10 +1,5 @@
 #!/bin/sh
 
-echo "This script bricked my laptop the last time I ran it, and I have not figured out why yet."
-echo "You should not run this script unless you really know what you're doing."
-echo "-- Charles"
-exit 1
-
 set -e
 set -u
 set -x
@@ -25,21 +20,34 @@ VERSION="$(cat ./VERSION)"
 
 RELEASENAME="herc-file-formats-$VERSION-$ARCH"
 
+
+# create a generic tarball
 cd build
 tar cvfz "../release/$RELEASENAME.tar.gz" .
+
+# now create a deb package
+
+mkdir ./DEBIAN
+mkdir ./usr
+mv ./bin ./include ./lib ./man ./usr/
+
+touch ./DEBIAN/conffiles # none, just need an empty file her
+
+echo "Package: herc-file-formats" > ./DEBIAN/control
+echo "Priority: extra" >> ./DEBIAN/control
+echo "Section: checkinstall" >> ./DEBIAN/control # I have no idea what "Section" means, just cargo-culted it from an example
+echo "Installed-Size: $(du -csh --block-size=1kB . | tail -n1 | awk '{print($1)}')" >> ./DEBIAN/control
+echo "Maintainer: None" >> ./DEBIAN/control
+echo "Architecture: amd64" >> ./DEBIAN/control
+echo "Version: $VERSION" >> ./DEBIAN/control
+echo "Provides: herc-file-formats" >> ./DEBIAN/control
+echo "Description: HeRC Lab tools and libraries for file formats" >> ./DEBIAN/control
+
+dpkg-deb -b ./
+
+mv '..deb' "../release/$RELEASENAME.deb"
+
+rm -rf ./DEBIAN
+rm -rf ./usr
+
 cd ..
-
-PROJ="$(pwd)"
-TEMP="$(mktemp -d)"
-
-cp -R ./ "$TEMP"
-cd "$TEMP"
-
-printf "HeRC File Formats\n" | sudo checkinstall -D --install=no --gzman --strip --nodoc --pkgrelease "$VERSION" --pkgname herc-file-formats
-sudo chown "$(whoami)" *.deb
-mv *.deb "$PROJ/release/$RELEASENAME.deb"
-
-ls -lah
-
-cd "$PROJ"
-rm -rf "$TEMP"

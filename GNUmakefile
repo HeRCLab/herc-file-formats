@@ -50,7 +50,7 @@ install: build
 .PHONY: install
 
 clean:
-> rm -rf ./build
+> rm -rf ./build ./release
 > $(MAKE) -C ./mlpx clean
 > $(MAKE) -C ./wavegen clean
 .PHONY: clean
