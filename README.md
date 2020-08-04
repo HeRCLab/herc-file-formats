@@ -1,6 +1,6 @@
 # herc-file-formats
 
-[![HeRCLab](https://circleci.com/gh/herclab/herc-file-formats.svg?style=svg)](https://app.circleci.com/pipelines/github/herclab/herc-file-formats?branch=master) [![HeRCLab](https://goreportcard.com/badge/github.com/herclab/herc-file-formats)](https://goreportcard.com/report/github.com/herclab/herc-file-formats) [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/herclab/herc-file-formats)
+[![HeRCLab](https://circleci.com/gh/HeRCLab/herc-file-formats.svg?style=svg)](https://app.circleci.com/pipelines/github/HeRCLab/herc-file-formats?branch=master) [![HeRCLab](https://goreportcard.com/badge/github.com/HeRCLab/herc-file-formats)](https://goreportcard.com/report/github.com/HeRCLab/herc-file-formats) [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/HeRCLab/herc-file-formats)
 
 This repository contains specifications and implementations for bespoke file
 formats created for the HeRC lab, or for file formats we use in our work that
