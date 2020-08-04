@@ -5,7 +5,7 @@ PREFIX=/usr/local
 build: build-mlpx build-wavegen
 .PHONY: build
 
-builddir: clean
+builddir:
 > mkdir -p ./build
 .pHONY: builddir
 
@@ -51,4 +51,6 @@ install: build
 
 clean:
 > rm -rf ./build
+> $(MAKE) -C ./mlpx clean
+> $(MAKE) -C ./wavegen clean
 .PHONY: clean

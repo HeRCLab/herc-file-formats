@@ -3,7 +3,7 @@ include ./opinionated.mk
 GOSRC=$(shell find . -iname "*.go" )
 PREFIX=/usr/local
 
-BUILD_MAN_PAGES=build/man/3/mlpx.3 build/man/5/mlpx.5 build/man/1/mlpx.1 build/man/1/mlpx-new.1 build/man/1/mlpx-validate.1 build/man/1/mlpx-diff.1
+BUILD_MAN_PAGES=build/man/man3/mlpx.3 build/man/man5/mlpx.5 build/man/man1/mlpx.1 build/man/man1/mlpx-new.1 build/man/man1/mlpx-validate.1 build/man/man1/mlpx-diff.1
 BUILD_BINARIES=build/bin/mlpx build/bin/mlpx-config
 BUILD_INCLUDES=build/include/mlpx/mlpx.h
 BUILD_LIBS=build/lib/libmlpx.so build/lib/libmlpx.a
@@ -21,9 +21,9 @@ lint:
 
 builddirs:
 > mkdir -p ./build/bin
-> mkdir -p ./build/man/1
-> mkdir -p ./build/man/3
-> mkdir -p ./build/man/5
+> mkdir -p ./build/man/man1
+> mkdir -p ./build/man/man3
+> mkdir -p ./build/man/man5
 > mkdir -p ./build/lib
 > mkdir -p ./build/include/mlpx
 .PHONY: builddirs
@@ -36,22 +36,22 @@ build/bin/mlpx-config: ./cmd/mlpx-config/mlpx-config
 > chmod +x $@
 .PHONY: build/bin/mlpx-config
 
-build/man/3/%.3: doc/3/%.md builddirs
+build/man/man3/%.3: doc/3/%.md builddirs
 > ronn < $< > $@
 
-build/man/5/%.5: doc/5/%.md builddirs
+build/man/man5/%.5: doc/5/%.md builddirs
 > ronn < $< > $@
 
-build/man/1/mlpx.1: ./build/bin/mlpx builddirs
+build/man/man1/mlpx.1: ./build/bin/mlpx builddirs
 > help2man --include=include.txt --no-info --no-discard-stderr $< > "$@"
 
-build/man/1/mlpx-new.1: ./build/bin/mlpx builddirs
+build/man/man1/mlpx-new.1: ./build/bin/mlpx builddirs
 > help2man --include=include.txt --no-info --no-discard-stderr "$< new" > "$@"
 
-build/man/1/mlpx-diff.1: ./build/bin/mlpx builddirs
+build/man/man1/mlpx-diff.1: ./build/bin/mlpx builddirs
 > help2man --include=include.txt --no-info --no-discard-stderr "$< diff" > "$@"
 
-build/man/1/mlpx-validate.1: ./build/bin/mlpx builddirs
+build/man/man1/mlpx-validate.1: ./build/bin/mlpx builddirs
 > help2man --include=include.txt --no-info --no-discard-stderr "$< validate" > "$@"
 
 build/lib/libmlpx.so: builddirs

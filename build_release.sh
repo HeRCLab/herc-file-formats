@@ -21,7 +21,7 @@ make build
 
 mkdir -p ./release
 
-VERSION="0.0.1"
+VERSION="$(cat ./VERSION)"
 
 RELEASENAME="herc-file-formats-$VERSION-$ARCH"
 

@@ -3,7 +3,7 @@ include ./opinionated.mk
 GOSRC=$(shell find . -iname "*.go" )
 PREFIX=/usr/local
 
-BUILD_MAN_PAGES=build/man/3/wavegen.3 build/man/5/wavegen.5  build/man/1/wavegen.1 build/man/1/wavegen-view.1 build/man/1/wavegen-generate.1 build/man/1/wavegen-summarize.1
+BUILD_MAN_PAGES=build/man/man3/wavegen.3 build/man/man5/wavegen.5  build/man/man1/wavegen.1 build/man/man1/wavegen-view.1 build/man/man1/wavegen-generate.1 build/man/man1/wavegen-summarize.1
 BUILD_BINARIES=build/bin/wavegen build/bin/wavegen-config
 BUILD_INCLUDES=build/include/wavegen/wavegen.h
 BUILD_LIBS=build/lib/libwavegen.so build/lib/libwavegen.a
@@ -23,9 +23,9 @@ lint:
 
 builddirs:
 > mkdir -p ./build/bin
-> mkdir -p ./build/man/1
-> mkdir -p ./build/man/3
-> mkdir -p ./build/man/5
+> mkdir -p ./build/man/man1
+> mkdir -p ./build/man/man3
+> mkdir -p ./build/man/man5
 > mkdir -p ./build/lib
 > mkdir -p ./build/include/wavegen
 .PHONY: builddirs
@@ -38,22 +38,22 @@ build/bin/wavegen-config: ./cmd/wavegen-config/wavegen-config
 > chmod +x $@
 .PHONY: build/bin/wavegen-config
 
-build/man/3/%.3: doc/3/%.md builddirs
+build/man/man3/%.3: doc/3/%.md builddirs
 > ronn < $< > $@
 
-build/man/5/%.5: doc/5/%.md builddirs
+build/man/man5/%.5: doc/5/%.md builddirs
 > ronn < $< > $@
 
-build/man/1/wavegen.1: ./build/bin/wavegen builddirs
+build/man/man1/wavegen.1: ./build/bin/wavegen builddirs
 > help2man --include=include.txt --no-info --no-discard-stderr $< > "$@"
 
-build/man/1/wavegen-generate.1: ./build/bin/wavegen builddirs
+build/man/man1/wavegen-generate.1: ./build/bin/wavegen builddirs
 > help2man --include=include.txt --no-info --no-discard-stderr "$< generate" > "$@"
 
-build/man/1/wavegen-view.1: ./build/bin/wavegen builddirs
+build/man/man1/wavegen-view.1: ./build/bin/wavegen builddirs
 > help2man --include=include.txt --no-info --no-discard-stderr "$< view" > "$@"
 
-build/man/1/wavegen-summarize.1: ./build/bin/wavegen builddirs
+build/man/man1/wavegen-summarize.1: ./build/bin/wavegen builddirs
 > help2man --include=include.txt --no-info --no-discard-stderr "$< summarize" > "$@"
 
 build/lib/libwavegen.so: builddirs
