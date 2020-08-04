@@ -59,9 +59,19 @@ the format otherwise.
 
 ## Versioning
 
-When a release of a file format/implementation is complete, the relevant commit
-should be tagged with `formatname-versionnumber`. A valid example might be
-`tnx-0.0.3`.
+Each individual format or tool may have it's own internal version. When a new
+version needs to be released, a monotonically increasing version number will be
+selected as the herc-file-formats release, and used for any generated packages.
+This version number will attempt to follow semantic versioning to the extend
+possible.
+
+## Version History
+
+### 0.0.1 (upcoming)
+
+Released formats:
+* mlpx 0.0.1
+* wavegen 0.0.4
 
 ## Future Work
 

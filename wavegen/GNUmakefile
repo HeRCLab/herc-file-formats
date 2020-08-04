@@ -14,7 +14,6 @@ build: $(BUILD_EVERYTHING)
 
 test:
 > $(MAKE) -C ./go test
-> $(MAKE) -C ./c test
 .PHONY: test
 
 lint:
