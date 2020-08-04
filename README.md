@@ -1,6 +1,10 @@
 # herc-file-formats
 
-[![HeRCLab](https://circleci.com/gh/HeRCLab/herc-file-formats.svg?style=svg)](https://app.circleci.com/pipelines/github/HeRCLab/herc-file-formats?branch=master) [![HeRCLab](https://goreportcard.com/badge/github.com/HeRCLab/herc-file-formats)](https://goreportcard.com/report/github.com/HeRCLab/herc-file-formats) [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/HeRCLab/herc-file-formats)
+[![HeRCLab](https://circleci.com/gh/HeRCLab/herc-file-formats.svg?style=svg)](https://app.circleci.com/pipelines/github/HeRCLab/herc-file-formats?branch=master) [![HeRCLab](https://goreportcard.com/badge/github.com/HeRCLab/herc-file-formats)](https://goreportcard.com/report/github.com/HeRCLab/herc-file-formats)
+
+| MLPX Docs | Wavegen Docs |
+|---|---|
+| [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/herclab/herc-file-formats/mlpx) | [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/herclab/herc-file-formats/wavegen) |
 
 This repository contains specifications and implementations for bespoke file
 formats created for the HeRC lab, or for file formats we use in our work that
