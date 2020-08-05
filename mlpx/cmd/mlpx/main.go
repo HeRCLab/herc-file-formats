@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/akamensky/argparse"
+	"github.com/alecthomas/kong"
 
 	"github.com/herclab/herc-file-formats/mlpx/go/mlpx"
 
@@ -24,162 +24,111 @@ func randrange(l []float64) float64 {
 	return min + rand.Float64()*(max-min)
 }
 
-func main() {
-	parser := argparse.NewParser("mlpx", "MLP eXchange utility")
-
-	versionFlag := parser.Flag("v", "version", &argparse.Options{Help: "Display version number and exit."})
-
-	randomSeed := parser.String("S", "seed", &argparse.Options{
-		Help:    "Specify a random seed as an integer, or '-' for the current system time",
-		Default: "-",
-	})
-
-	//// new command //////////////////////////////////////////////////////
-
-	newCommand := parser.NewCommand("new", "Generate a new MLPX with random weights and biases.")
-
-	newLayerSizes := newCommand.IntList("s", "sizes",
-		&argparse.Options{
-			Help:    "Specify a list of integer layer sizes, in neurons",
-			Default: []int{5, 10, 5},
-			Validate: func(args []string) error {
-				for i, v := range args {
-					s, err := strconv.Atoi(v)
-					if err != nil {
-						return fmt.Errorf("Could not parse layer size %d ('%s') due to error: %v", i, v, err)
-					}
-
-					if s < 1 {
-						return fmt.Errorf("Layer size %d ('%s') is too small, must have at least one neuron", i, v)
-					}
-				}
-
-				return nil
-			},
-		})
-
-	defaultLayerActivations := true
-
-	newLayerActivations := newCommand.StringList("a", "activations",
-		&argparse.Options{
-			Help: "Specify a list of activation function strings for each layer. Takes precedence over --default_activation",
-			Validate: func(args []string) error {
-				defaultLayerActivations = true
-				return nil
-			},
-		})
-
-	newLayerDefaultActivation := newCommand.String("A", "default_activation",
-		&argparse.Options{
-			Help:    "Specify an activation function to be used for all layers. If used in conjunction with --activations, this argument is ignored",
-			Default: "sigmoid",
-		})
-
-	newBiasRange := newCommand.FloatList("b", "bias_range",
-		&argparse.Options{
-			Help:    "Specify the upper and lower bounds for the random bias values.",
-			Default: []float64{0, 1.0},
-		})
-
-	newWeightRange := newCommand.FloatList("w", "weight_range",
-		&argparse.Options{
-			Help:    "Specify the upper and lower bounds for the random weight values.",
-			Default: []float64{0, 1.0},
-		})
-
-	newAlpha := newCommand.Float("p", "alpha",
-		&argparse.Options{
-			Help:    "Specify the learning rate.",
-			Default: 0.1,
-		})
-
-	newOutput := newCommand.String("o", "output",
-		&argparse.Options{
-			Default: "-",
-			Help:    "Specify the output at which the generated MLPX should be stored, or '-' for standard out.",
-		})
-
-	//// validate command /////////////////////////////////////////////////
-
-	validateCommand := parser.NewCommand("validate", "Validate an existing MLPX file from disk.")
-
-	validateInput := validateCommand.String("i", "input",
-		&argparse.Options{
-			Help:    "Specify the MLPX file to validate, or '-' for standard input.",
-			Default: "-",
-		})
-
-	//// diff command /////////////////////////////////////////////////////
-
-	diffCommand := parser.NewCommand("diff", "Compare two existing MLPX files")
-
-	diffInput := diffCommand.StringList("i", "input",
-		&argparse.Options{
-			Help:     "Specify two MLPX files to diff.",
-			Required: true,
-		})
-
-	diffIndent := diffCommand.String("I", "indent",
-		&argparse.Options{
-			Help:    "Specify the indent that should be used to show hierarchy.",
-			Default: "\t",
-		})
-
-	diffEpsilon := diffCommand.Float("e", "epsilon",
-		&argparse.Options{
-			Help:    "Epsilon value used when comparing floating point numbers.",
-			Default: 0.00001,
-		})
-
-	err := parser.Parse(os.Args)
+// getDashDir exists because we use the convention of '-' to mean standard in
+// or standard out for file argument. We want to use kong "path" type for
+// these, so that path expansions will be applied. However since '-' is a
+// non-relative path, Kong expands it to <cwd>/-. This function returns what
+// that path will be in that event.
+//
+// This precludes the user from specifying a file named '-' in their CWD.
+func getDashDir() string {
+	wd, err := os.Getwd()
 	if err != nil {
-		fmt.Fprint(os.Stderr, parser.Usage(err))
+		fmt.Sprintf("failed to get working directory: %v\n", err)
 		os.Exit(1)
 	}
+	return fmt.Sprintf("%s/-", wd)
+}
 
-	if *versionFlag {
+var CLI struct {
+	New struct {
+		Sizes             []int     `name:"sizes" short:"s" help:"List of layer sizes in in neurons. (Default: 5 10 5)"`
+		Activations       []string  `name:"activations" short:"a" help:"List of activation function strings for each layer. Takes precedence over --default_activation."`
+		DefaultActivation string    `name:"default_activation" short:"A" default:"sigmoid" help:"Activation function to be used for all layers. If used in conjunction with --activations, this argument is ignored."`
+		BiasRange         []float64 `name:"bias_range" short:"b" help:"Lower and upper bound (from left to right) for the random bias values. (Default: 0 1)"`
+		WeightRange       []float64 `name:"weight_range" short:"w" help:"Lower and upper bound (from left to right) for the random weight values. (Default: 0 1)"`
+		Alpha             float64   `name:"alpha" short:"p" default:"0.001" help:"Learning rate."`
+		Output            string    `name:"output" short:"o" type:"path" default:"-" help:"Output file to which the generated MLPX will be written. Specify '-' for standard output."`
+	} `cmd help:"Generate a new MLPX file."`
+
+	Validate struct {
+		Input string `arg name:"input" short:"i" type:"path" default:"-" help:"Input MLPX file to validate, or '-' for standard input."`
+	} `cmd help:"Validate an existing MLPX file."`
+
+	Diff struct {
+		Base    string  `arg required type:"path" help:"Path to an MLPX file which is used as the baseline for the comparison."`
+		Other   string  `arg required type:"path" help:"Path to an MLPX file which will be compared to the baseline."`
+		Indent  string  `name:"indent" default:"\t" short"I" help:"Specify the indent that should be used to show hierarchy."`
+		Epsilon float64 `name:"epsilon" short:"e" default:"0.00001" help:"Epsilon value to use when comparing floating point numbers."`
+	} `cmd help:"Compare two existing MLPX files."`
+
+	Seed string `name:"seed" short:"s" default:"-" help:"Seed for random number generator, as an integer. You may wish to set this if you want to reproducible generate the same MLPX multiple times. Use '-' for the current system time."`
+
+	Version bool `name:"version" short:"V" default:"false" help:"Display version and exit"`
+}
+
+func main() {
+
+	ctx := kong.Parse(&CLI)
+
+	if CLI.Version {
 		fmt.Printf("mlpx v0.0.1-git\n")
 		os.Exit(0)
 	}
 
-	if *randomSeed == "-" {
+	// default value for --sizes
+	if len(CLI.New.Sizes) == 0 {
+		CLI.New.Sizes = []int{5, 10, 5}
+	}
+
+	// default value for biases
+	if len(CLI.New.BiasRange) == 0 {
+		CLI.New.BiasRange = []float64{0, 1}
+	}
+
+	// default value for weights
+	if len(CLI.New.WeightRange) == 0 {
+		CLI.New.WeightRange = []float64{0, 1}
+	}
+
+	if CLI.Seed == "-" {
 		rand.Seed(time.Now().UTC().UnixNano())
 	} else {
-		s, err := strconv.Atoi(*randomSeed)
+		s, err := strconv.Atoi(CLI.Seed)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Invalid random seed '%s': %v\n", *randomSeed, err)
+			fmt.Fprintf(os.Stderr, "Invalid random seed '%s': %v\n", CLI.Seed, err)
 			os.Exit(1)
 		}
 		rand.Seed(int64(s))
 	}
 
-	if newCommand.Happened() {
+	if ctx.Command() == "new" {
 		activations := []string{}
-		if defaultLayerActivations {
-			for i := 0; i < len(*newLayerSizes); i++ {
-				activations = append(activations, *newLayerDefaultActivation)
+		if len(CLI.New.Activations) == 0 {
+			for i := 0; i < len(CLI.New.Sizes); i++ {
+				activations = append(activations, CLI.New.DefaultActivation)
 			}
 		} else {
-			activations = append(activations, *newLayerActivations...)
+			activations = append(activations, CLI.New.Activations...)
 		}
 
-		if len(*newLayerSizes) != len(activations) {
-			fmt.Fprintf(os.Stderr, "Must specify same number of layer sizes and activation functions")
+		if len(CLI.New.Sizes) != len(activations) {
+			fmt.Fprintf(os.Stderr, "Must specify same number of layer sizes and activation functions\n")
 			os.Exit(1)
 		}
 
-		if len(*newLayerSizes) < 2 {
-			fmt.Fprintf(os.Stderr, "Must specify at least two layers")
+		if len(CLI.New.Sizes) < 2 {
+			fmt.Fprintf(os.Stderr, "Must specify at least two layers\n")
 			os.Exit(1)
 		}
 
-		if len(*newBiasRange) != 2 {
-			fmt.Fprintf(os.Stderr, "Must specify an upper and lower bias range")
+		if len(CLI.New.BiasRange) != 2 {
+			fmt.Fprintf(os.Stderr, "Must specify an upper and lower bias range\n")
 			os.Exit(1)
 		}
 
-		if len(*newWeightRange) != 2 {
-			fmt.Fprintf(os.Stderr, "Must specify an upper and lower weight range")
+		if len(CLI.New.WeightRange) != 2 {
+			fmt.Fprintf(os.Stderr, "Must specify an upper and lower weight range\n")
 			os.Exit(1)
 		}
 
@@ -187,10 +136,10 @@ func main() {
 
 		// create our initializer snapshot
 		snapid := m.NextSnapshotID()
-		m.MustMakeSnapshot(snapid, *newAlpha)
+		m.MustMakeSnapshot(snapid, CLI.New.Alpha)
 		snap := m.Snapshots[snapid]
 
-		for index, neurons := range *newLayerSizes {
+		for index, neurons := range CLI.New.Sizes {
 			if neurons < 1 {
 				fmt.Fprintf(os.Stderr, "Layer %d must have at least one neuron, requested %d", index, neurons)
 				os.Exit(1)
@@ -205,7 +154,7 @@ func main() {
 				pred = ""
 				succ = "1"
 
-			} else if index == len(*newLayerSizes)-1 {
+			} else if index == len(CLI.New.Sizes)-1 {
 				layerID = "output"
 				succ = ""
 
@@ -214,7 +163,7 @@ func main() {
 				pred = "input"
 			}
 
-			if index == len(*newLayerSizes)-2 {
+			if index == len(CLI.New.Sizes)-2 {
 				succ = "output"
 			}
 
@@ -226,17 +175,17 @@ func main() {
 			layer.EnsureBiases()
 
 			for i := 0; i < len(*layer.Weights); i++ {
-				(*layer.Weights)[i] = randrange(*newWeightRange)
+				(*layer.Weights)[i] = randrange(CLI.New.WeightRange)
 			}
 
 			for i := 0; i < len(*layer.Biases); i++ {
-				(*layer.Biases)[i] = randrange(*newBiasRange)
+				(*layer.Biases)[i] = randrange(CLI.New.BiasRange)
 			}
 
 			layer.ActivationFunction = activations[index]
 		}
 
-		if *newOutput == "-" {
+		if CLI.New.Output == getDashDir() {
 			data, err := m.ToJSON()
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to generate JSON: %v\n", err)
@@ -246,20 +195,22 @@ func main() {
 			fmt.Print(string(data))
 			fmt.Print("")
 		} else {
-			err := m.WriteJSON(*newOutput)
+			err := m.WriteJSON(CLI.New.Output)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to write output: %v\n", err)
 				os.Exit(1)
 			}
 		}
 
-	} else if validateCommand.Happened() {
+	} else if (ctx.Command() == "validate") || (ctx.Command() == "validate <input>") {
 		data := []byte{}
-		if *validateInput == "-" {
+
+		if CLI.Validate.Input == getDashDir() {
 			if isatty.IsTerminal(os.Stdin.Fd()) {
 				fmt.Fprintf(os.Stderr, "Reading input from standard in.\n")
 			}
 
+			var err error
 			data, err = ioutil.ReadAll(os.Stdin)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to read input: %v\n", err)
@@ -267,7 +218,8 @@ func main() {
 			}
 
 		} else {
-			data, err = ioutil.ReadFile(*validateInput)
+			var err error
+			data, err = ioutil.ReadFile(CLI.Validate.Input)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to read input: %v\n", err)
 				os.Exit(1)
@@ -288,30 +240,35 @@ func main() {
 
 		os.Exit(0)
 
-	} else if diffCommand.Happened() {
-		if len(*diffInput) != 2 {
-			fmt.Fprintf(os.Stderr, "Must specify exactly two files to diff")
-			os.Exit(1)
-		}
-
-		m1, err := mlpx.ReadJSON((*diffInput)[0])
+	} else if ctx.Command() == "diff <base> <other>" {
+		m1, err := mlpx.ReadJSON(CLI.Diff.Base)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to read MLPX file '%s': %v", (*diffInput)[0], err)
+			fmt.Fprintf(os.Stderr, "Failed to read MLPX file '%s': %v\n", CLI.Diff.Base, err)
 			os.Exit(1)
 		}
 
-		m2, err := mlpx.ReadJSON((*diffInput)[1])
+		m2, err := mlpx.ReadJSON(CLI.Diff.Other)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to read MLPX file '%s': %v", (*diffInput)[1], err)
+			fmt.Fprintf(os.Stderr, "Failed to read MLPX file '%s': %v\n", CLI.Diff.Other, err)
 			os.Exit(1)
 		}
 
-		diffs := m1.Diff(m2, *diffIndent, *diffEpsilon)
+		// This makes \t actually turn into a tab character
+		expanded, err := strconv.Unquote(fmt.Sprintf("\"%s\"", CLI.Diff.Indent))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to expand indent: '%s': %v\n", CLI.Diff.Indent, err)
+			os.Exit(1)
+		}
+
+		diffs := m1.Diff(m2, expanded, CLI.Diff.Epsilon)
 		for _, d := range diffs {
 			fmt.Println(d)
 		}
 
 		os.Exit(len(diffs))
+	} else {
+		fmt.Fprintf(os.Stderr, "Don't understand how to parse that command.\n")
+		panic(ctx.Command())
 	}
 
 }
