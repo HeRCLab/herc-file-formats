@@ -482,7 +482,7 @@ type Layer struct {
 	Successor string `json:"successor"`
 
 	// Neurons is the number of neurons in the layer
-	Neurons int `json: "neurons"`
+	Neurons int `json:"neurons"`
 
 	// Weights is the weights list for the layers
 	Weights *[]float64 `json:"weights"`
