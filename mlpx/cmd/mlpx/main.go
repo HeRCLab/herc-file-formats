@@ -42,11 +42,11 @@ func getDashDir() string {
 
 var CLI struct {
 	New struct {
-		Sizes             []int     `name:"sizes" short:"s" help:"List of layer sizes in in neurons. (Default: 5 10 5)"`
+		Sizes             []int     `name:"sizes" short:"s" default:"5,10,5" help:"List of layer sizes in in neurons."`
 		Activations       []string  `name:"activations" short:"a" help:"List of activation function strings for each layer. Takes precedence over --default_activation."`
 		DefaultActivation string    `name:"default_activation" short:"A" default:"sigmoid" help:"Activation function to be used for all layers. If used in conjunction with --activations, this argument is ignored."`
-		BiasRange         []float64 `name:"bias_range" short:"b" help:"Lower and upper bound (from left to right) for the random bias values. (Default: 0 1)"`
-		WeightRange       []float64 `name:"weight_range" short:"w" help:"Lower and upper bound (from left to right) for the random weight values. (Default: 0 1)"`
+		BiasRange         []float64 `name:"bias_range" short:"b" default:"0.0,1.0" help:"Lower and upper bound (from left to right) for the random bias values."`
+		WeightRange       []float64 `name:"weight_range" short:"w" default:"0.0,1.0" help:"Lower and upper bound (from left to right) for the random weight values. (Default: 0 1)"`
 		Alpha             float64   `name:"alpha" short:"p" default:"0.001" help:"Learning rate."`
 		Output            string    `name:"output" short:"o" type:"path" default:"-" help:"Output file to which the generated MLPX will be written. Specify '-' for standard output."`
 	} `cmd help:"Generate a new MLPX file."`
@@ -62,7 +62,7 @@ var CLI struct {
 		Epsilon float64 `name:"epsilon" short:"e" default:"0.00001" help:"Epsilon value to use when comparing floating point numbers."`
 	} `cmd help:"Compare two existing MLPX files."`
 
-	Seed string `name:"seed" short:"s" default:"-" help:"Seed for random number generator, as an integer. You may wish to set this if you want to reproducible generate the same MLPX multiple times. Use '-' for the current system time."`
+	Seed string `name:"seed" short:"S" default:"-" help:"Seed for random number generator, as an integer. You may wish to set this if you want to reproducible generate the same MLPX multiple times. Use '-' for the current system time."`
 
 	Version bool `name:"version" short:"V" default:"false" help:"Display version and exit"`
 }
@@ -74,21 +74,6 @@ func main() {
 	if CLI.Version {
 		fmt.Printf("mlpx v0.0.1-git\n")
 		os.Exit(0)
-	}
-
-	// default value for --sizes
-	if len(CLI.New.Sizes) == 0 {
-		CLI.New.Sizes = []int{5, 10, 5}
-	}
-
-	// default value for biases
-	if len(CLI.New.BiasRange) == 0 {
-		CLI.New.BiasRange = []float64{0, 1}
-	}
-
-	// default value for weights
-	if len(CLI.New.WeightRange) == 0 {
-		CLI.New.WeightRange = []float64{0, 1}
 	}
 
 	if CLI.Seed == "-" {
