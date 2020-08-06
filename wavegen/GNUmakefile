@@ -3,7 +3,7 @@ include ./opinionated.mk
 GOSRC=$(shell find . -iname "*.go" )
 PREFIX=/usr/local
 
-BUILD_MAN_PAGES=build/man/man3/wavegen.3 build/man/man5/wavegen.5  build/man/man1/wavegen.1 build/man/man1/wavegen-view.1 build/man/man1/wavegen-generate.1 build/man/man1/wavegen-summarize.1
+BUILD_MAN_PAGES=build/man/man3/wavegen.3 build/man/man5/wavegen.5  build/man/man1/wavegen.1 build/man/man1/wavegen-view.1 build/man/man1/wavegen-generate.1 build/man/man1/wavegen-summarize.1 build/man/man1/wavegen-interpolate.1
 BUILD_BINARIES=build/bin/wavegen build/bin/wavegen-config
 BUILD_INCLUDES=build/include/wavegen/wavegen.h
 BUILD_LIBS=build/lib/libwavegen.so build/lib/libwavegen.a
@@ -55,6 +55,9 @@ build/man/man1/wavegen-view.1: ./build/bin/wavegen builddirs
 
 build/man/man1/wavegen-summarize.1: ./build/bin/wavegen builddirs
 > help2man --include=include.txt --no-info --no-discard-stderr "$< summarize" > "$@"
+
+build/man/man1/wavegen-interpolate.1: ./build/bin/wavegen builddirs
+> help2man --include=include.txt --no-info --no-discard-stderr "$< interpolate " > "$@"
 
 build/lib/libwavegen.so: builddirs
 > $(MAKE) -C ./c wavegen.so
