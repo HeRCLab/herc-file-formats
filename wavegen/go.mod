@@ -9,6 +9,7 @@ require (
 	github.com/guptarohit/asciigraph v0.4.2
 	github.com/herclab/wavegen v0.0.0-20200727232815-585d89319220 // indirect
 	github.com/kingishb/go-gnuplot v0.0.0-20180328172346-32f3e1634ed0
+	github.com/mattn/go-isatty v0.0.12
 	github.com/montanaflynn/stats v0.6.3
 	gonum.org/v1/plot v0.7.0
 )

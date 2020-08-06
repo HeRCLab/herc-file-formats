@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/herclab/herc-file-formats/wavegen/go/wavegen"
+
+	"github.com/mattn/go-isatty"
 
 	"github.com/akamensky/argparse"
 
@@ -210,6 +213,15 @@ func main() {
 
 	summarizeInput := summarizeCmd.String("i", "input", &argparse.Options{Help: "File to summarize.", Required: true})
 
+	/****** interpolate sub-command **************************************/
+	interpolateCmd := parser.NewCommand("interpolate", "Interpolates a wavegen data file by it's contents, rather than by re-generating it. Note that the parameters will be stripped, as they can no longer accurately re-produce the data in the body of the file.")
+
+	interpolateInput := interpolateCmd.String("i", "input", &argparse.Options{Help: "File to interpolate, '-' for stdin", Default: "-"})
+
+	interpolateOutput := interpolateCmd.String("o", "output", &argparse.Options{Help: "Where to save interpolated results, '-' for stdout", Default: "-"})
+
+	interpolateFrequency := interpolateCmd.Float("f", "frequency", &argparse.Options{Help: "Frequency at which to interpolate the data in Hz"})
+
 	err := parser.Parse(os.Args)
 	if err != nil {
 		fmt.Fprint(os.Stderr, parser.Usage(err))
@@ -365,6 +377,64 @@ func main() {
 		}
 
 		summarize(loaded)
+
+	} else if interpolateCmd.Happened() {
+		/***** interpolate sub-command *******************************/
+
+		var data []byte
+		var err error
+
+		if *interpolateInput == "-" {
+			if isatty.IsTerminal(os.Stdin.Fd()) {
+				fmt.Fprintf(os.Stderr, "Reading input from standard in.\n")
+			}
+
+			data, err = ioutil.ReadAll(os.Stdin)
+		} else {
+			data, err = ioutil.ReadFile(*interpolateInput)
+		}
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to read input: %v\n", err)
+			os.Exit(1)
+		}
+
+		loaded, err := wavegen.FromJSON(data)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to parse input: %v\n", err)
+			os.Exit(1)
+		}
+
+		timestamps := make([]float64, 0)
+		period := 1.0 / *interpolateFrequency
+		for i := 0; float64(i) < (loaded.Signal.Duration() / period); i++ {
+			timestamps = append(timestamps, float64(i)*period)
+		}
+
+		interpedSignal := loaded.Signal.Interpolate(timestamps...)
+
+		resfile := &wavegen.WaveFile{
+			Version:    0,
+			Parameters: nil,
+			Signal:     wavegen.SampleList(interpedSignal).ToSignal(),
+		}
+
+		if *interpolateOutput == "-" {
+			data, err := resfile.ToJSON()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to generate JSON: %v\n", err)
+				os.Exit(1)
+			}
+			fmt.Print(string(data))
+			fmt.Print("")
+
+		} else {
+			err := resfile.WriteJSON(*interpolateOutput)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to write output: %v\n", err)
+				os.Exit(1)
+			}
+		}
 
 	} else {
 		err := fmt.Errorf("no command specified")

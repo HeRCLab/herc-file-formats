@@ -182,6 +182,23 @@ type Sample struct {
 
 type SampleList []Sample
 
+// ToSignal converts a list of samaples to a Signal object, and sets the
+// sample rate thereof to their average sample rate.
+func (l SampleList) ToSignal() *Signal {
+	sig := &Signal{
+		S: []float64{},
+		T: []float64{},
+	}
+	for _, s := range l {
+		sig.S = append(sig.S, s.S)
+		sig.T = append(sig.T, s.T)
+	}
+
+	sig.SampleRate = sig.AverageSampleRate()
+
+	return sig
+}
+
 // Declare conformity with plotter.XYer
 var _ plotter.XYer = (SampleList)(nil)
 
