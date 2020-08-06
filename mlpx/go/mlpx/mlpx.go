@@ -19,7 +19,7 @@ type MLPX struct {
 	//
 	// Caveat: because of how encoding/json works, the version level
 	// is usually encoded as a float64.
-	Schema []interface{} `json: "schema"`
+	Schema []interface{} `json:"schema"`
 
 	// Snapshots is used to represent the snapshot table.
 	Snapshots map[string]*Snapshot `json:"snapshots"`
