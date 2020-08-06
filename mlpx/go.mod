@@ -7,6 +7,7 @@ require (
 	github.com/alecthomas/kong v0.2.11
 	github.com/alexflint/go-arg v1.3.0
 	github.com/google/go-cmp v0.5.1
+	github.com/kingishb/go-gnuplot v0.0.0-20180328172346-32f3e1634ed0
 	github.com/kr/pretty v0.2.0
 	github.com/mattn/go-isatty v0.0.12
 	github.com/montanaflynn/stats v0.6.3

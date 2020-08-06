@@ -9,6 +9,8 @@ github.com/alexflint/go-scalar v1.0.0/go.mod h1:GpHzbCOZXEKMEcygYQ5n/aa4Aq84zbxj
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/go-cmp v0.5.1/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/herclab/herc-file-formats v0.0.0-20200805175915-9dc85f8790c5 h1:wCAfRqHC7vuGuxjyoWH4oa67Wt/Zj+MDwtfywZjo3ZU=
+github.com/kingishb/go-gnuplot v0.0.0-20180328172346-32f3e1634ed0 h1:gcczQvVAJyOLpHG7r2f4ttg9pcTgsyHqUxqsoOz9wk0=
+github.com/kingishb/go-gnuplot v0.0.0-20180328172346-32f3e1634ed0/go.mod h1:LPaRgowZ4VQW1O0eX1YVmxr09uyBJaWTU2co/qmM2ek=
 github.com/kr/pretty v0.2.0/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=

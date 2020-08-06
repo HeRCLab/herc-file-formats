@@ -67,6 +67,10 @@ var CLI struct {
 		Epsilon float64 `name:"epsilon" short:"e" default:"0.00001" help:"Epsilon value to use when comparing floating point numbers."`
 	} `cmd help:"Compare two existing MLPX files."`
 
+	PlotBias struct {
+		Inputs []string `arg type:"existingpath" help:"Input files to plot."`
+	} `cmd help:"Plot average bias across one or more MLPX files over time."`
+
 	Seed string `name:"seed" short:"S" default:"-" help:"Seed for random number generator, as an integer. You may wish to set this if you want to reproducible generate the same MLPX multiple times. Use '-' for the current system time."`
 
 	Version bool `name:"version" short:"V" default:"false" help:"Display version and exit"`
@@ -297,6 +301,27 @@ func main() {
 		}
 
 		os.Exit(len(diffs))
+
+	} else if ctx.Command() == "plot-bias" || ctx.Command() == "plot-bias <inputs>" {
+		mlps := []*mlpx.MLPX{}
+
+		for i, ipath := range CLI.PlotBias.Inputs {
+			m, err := mlpx.ReadJSON(ipath)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to load %d-th input file '%s'\n", i, ipath)
+				os.Exit(1)
+			}
+
+			mlps = append(mlps, m)
+		}
+
+		err := mlpx.PlotAverageBias(mlps)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error plotting biases: %v\n", err)
+			os.Exit(1)
+		}
+		os.Exit(0)
+
 	} else {
 		fmt.Fprintf(os.Stderr, "Don't understand how to parse that command.\n")
 		panic(ctx.Command())
