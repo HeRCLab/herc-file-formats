@@ -31,7 +31,7 @@ jobs:
       steps:
         - checkout
         - run: apt-get update
-        - run: sh -c 'DEBIAN_FRONTEND=noninteractive apt-get install -y help2man ronn checkinstall golang-go build-essential gnuplot sudo'
+        - run: sh -c 'DEBIAN_FRONTEND=noninteractive apt-get install -y help2man ronn checkinstall golang-go build-essential gnuplot sudo git'
         - run: ./build_release.sh
         - run:
             name: "Publish Release on GitHub"
