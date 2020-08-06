@@ -55,6 +55,11 @@ var CLI struct {
 		Input string `arg name:"input" short:"i" type:"path" default:"-" help:"Input MLPX file to validate, or '-' for standard input."`
 	} `cmd help:"Validate an existing MLPX file."`
 
+	Summarize struct {
+		Input  string `arg name:"input" short:"i" type:"path" default:"-" help:"Input MLPX file to summarize, or '-' for standard input."`
+		Indent string `name:"indent" default:"\t" short"I" help:"Specify the indent that should be used to show hierarchy."`
+	} `cmd help:"Summarize an existing MLPX file."`
+
 	Diff struct {
 		Base    string  `arg required type:"path" help:"Path to an MLPX file which is used as the baseline for the comparison."`
 		Other   string  `arg required type:"path" help:"Path to an MLPX file which will be compared to the baseline."`
@@ -222,6 +227,47 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Validation failed, error was: %v\n", err)
 			os.Exit(2)
 		}
+
+		os.Exit(0)
+
+	} else if (ctx.Command() == "summarize") || (ctx.Command() == "summarize <input>") {
+		data := []byte{}
+
+		if CLI.Summarize.Input == getDashDir() {
+			if isatty.IsTerminal(os.Stdin.Fd()) {
+				fmt.Fprintf(os.Stderr, "Reading input from standard in.\n")
+			}
+
+			var err error
+			data, err = ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to read input: %v\n", err)
+				os.Exit(1)
+			}
+
+		} else {
+			var err error
+			data, err = ioutil.ReadFile(CLI.Summarize.Input)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to read input: %v\n", err)
+				os.Exit(1)
+			}
+		}
+
+		// This makes \t actually turn into a tab character
+		expanded, err := strconv.Unquote(fmt.Sprintf("\"%s\"", CLI.Summarize.Indent))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to expand indent: '%s': %v\n", CLI.Summarize.Indent, err)
+			os.Exit(1)
+		}
+
+		m, err := mlpx.FromJSON(data)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to parse input: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Print(m.Summarize(expanded))
 
 		os.Exit(0)
 

@@ -8,6 +8,8 @@ import (
 	"math"
 	"sort"
 	"strconv"
+
+	"github.com/montanaflynn/stats"
 )
 
 // MLPX represents an entire MLPX file
@@ -21,6 +23,86 @@ type MLPX struct {
 
 	// Snapshots is used to represent the snapshot table.
 	Snapshots map[string]*Snapshot `json:"snapshots"`
+}
+
+func summarizeList(list []float64) string {
+	mean, err := stats.Mean(list)
+	if err != nil {
+		return fmt.Sprintf("ERROR: %v", err)
+	}
+
+	median, err := stats.Median(list)
+	if err != nil {
+		return fmt.Sprintf("ERROR: %v", err)
+	}
+
+	min, err := stats.Min(list)
+	if err != nil {
+		return fmt.Sprintf("ERROR: %v", err)
+	}
+
+	max, err := stats.Max(list)
+	if err != nil {
+		return fmt.Sprintf("ERROR: %v", err)
+	}
+
+	stdev, err := stats.StandardDeviation(list)
+	if err != nil {
+		return fmt.Sprintf("ERROR: %v", err)
+	}
+
+	return fmt.Sprintf("%d elements, mean=%f, median=%f, min=%f, max=%f, stdev=%f",
+		len(list), mean, median, min, max, stdev)
+}
+
+// Summarize creates a human-readable summary of an MLPX object.
+//
+// Indent is a string used for indenting hierarchical data.
+func (mlp *MLPX) Summarize(indent string) string {
+	snapids := mlp.SortedSnapshotIDs()
+
+	if len(snapids) == 0 {
+		return "Empty MLPX"
+	}
+
+	layerids := mlp.Snapshots[snapids[0]].SortedLayerIDs()
+
+	s := fmt.Sprintf("MLPX Object, %d snapshots, %d layers\n",
+		len(snapids), len(layerids))
+
+	for _, snapid := range snapids {
+		snap := mlp.Snapshots[snapid]
+
+		s = fmt.Sprintf("%sSnapshot: '%s'\n", s, snapid)
+		s = fmt.Sprintf("%s%sα = %f\n", s, indent, snap.Alpha)
+
+		for _, layerid := range snap.SortedLayerIDs() {
+			layer := snap.Layers[layerid]
+
+			s = fmt.Sprintf("%s%sLayer: '%s'\n", s, indent, layerid)
+			s = fmt.Sprintf("%s%s%sPredecessor: '%s'\n", s, indent, indent, layer.Predecessor)
+			s = fmt.Sprintf("%s%s%sSuccessor: '%s'\n", s, indent, indent, layer.Successor)
+			s = fmt.Sprintf("%s%s%sNeurons: %d\n", s, indent, indent, layer.Neurons)
+			s = fmt.Sprintf("%s%s%sActivation Function: '%s'\n", s, indent, indent, layer.ActivationFunction)
+			if layer.Weights != nil {
+				s = fmt.Sprintf("%s%s%sWeights: %s\n", s, indent, indent, summarizeList(*layer.Weights))
+			}
+			if layer.Outputs != nil {
+				s = fmt.Sprintf("%s%s%sOutputs: %s\n", s, indent, indent, summarizeList(*layer.Outputs))
+			}
+			if layer.Activations != nil {
+				s = fmt.Sprintf("%s%s%sActivations: %s\n", s, indent, indent, summarizeList(*layer.Activations))
+			}
+			if layer.Deltas != nil {
+				s = fmt.Sprintf("%s%s%sDeltas: %s\n", s, indent, indent, summarizeList(*layer.Deltas))
+			}
+			if layer.Biases != nil {
+				s = fmt.Sprintf("%s%s%sBiases: %s\n", s, indent, indent, summarizeList(*layer.Biases))
+			}
+		}
+	}
+
+	return s
 }
 
 // MakeMLPX creates a new, empty MLPX object

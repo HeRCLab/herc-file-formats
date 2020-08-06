@@ -3,7 +3,7 @@ include ./opinionated.mk
 GOSRC=$(shell find . -iname "*.go" )
 PREFIX=/usr/local
 
-BUILD_MAN_PAGES=build/man/man3/mlpx.3 build/man/man5/mlpx.5 build/man/man1/mlpx.1 build/man/man1/mlpx-new.1 build/man/man1/mlpx-validate.1 build/man/man1/mlpx-diff.1
+BUILD_MAN_PAGES=build/man/man3/mlpx.3 build/man/man5/mlpx.5 build/man/man1/mlpx.1 build/man/man1/mlpx-new.1 build/man/man1/mlpx-validate.1 build/man/man1/mlpx-diff.1 build/man/man1/mlpx-summarize.1
 BUILD_BINARIES=build/bin/mlpx build/bin/mlpx-config
 BUILD_INCLUDES=build/include/mlpx/mlpx.h
 BUILD_LIBS=build/lib/libmlpx.so build/lib/libmlpx.a
@@ -53,6 +53,9 @@ build/man/man1/mlpx-diff.1: ./build/bin/mlpx builddirs
 
 build/man/man1/mlpx-validate.1: ./build/bin/mlpx builddirs
 > help2man --include=include.txt --no-info --no-discard-stderr "$< validate" > "$@"
+
+build/man/man1/mlpx-summarize.1: ./build/bin/mlpx builddirs
+> help2man --include=include.txt --no-info --no-discard-stderr "$< summarize " > "$@"
 
 build/lib/libmlpx.so: builddirs
 > $(MAKE) -C ./c mlpx.so

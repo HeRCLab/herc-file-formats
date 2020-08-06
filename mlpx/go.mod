@@ -9,4 +9,5 @@ require (
 	github.com/google/go-cmp v0.5.1
 	github.com/kr/pretty v0.2.0
 	github.com/mattn/go-isatty v0.0.12
+	github.com/montanaflynn/stats v0.6.3
 )
