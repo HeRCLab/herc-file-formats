@@ -41,6 +41,7 @@ func AverageBias(mlps []*MLPX) [][]float64 {
 	return averageBiases
 }
 
+// PlotAverageBias uses gnuplot to display the results from AverageBias
 func PlotAverageBias(mlps []*MLPX) error {
 
 	p, err := gnuplot.NewPlotter("", true, false)
@@ -62,9 +63,15 @@ func PlotAverageBias(mlps []*MLPX) error {
 
 	for i := range mlps {
 		err = p.PlotX(biases[i], fmt.Sprintf("MLPX %d", i))
+		if err != nil {
+			return err
+		}
 	}
 
-	p.Cmd("pause 31540000")
+	err = p.Cmd("pause 31540000")
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
