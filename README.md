@@ -94,7 +94,9 @@ Released formats:
 * mlpx 0.0.1
 * wavegen 0.0.4
 
-### 0.0.2 (upcoming)
+### 0.0.2
+* mlpx 0.0.2
+* wavegen 0.0.4
 
 
 ## Future Work
