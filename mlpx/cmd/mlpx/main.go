@@ -72,7 +72,7 @@ func main() {
 	ctx := kong.Parse(&CLI)
 
 	if CLI.Version {
-		fmt.Printf("mlpx v0.0.1\n")
+		fmt.Printf("mlpx v0.0.2-git\n")
 		os.Exit(0)
 	}
 

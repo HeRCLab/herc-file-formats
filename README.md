@@ -88,11 +88,14 @@ possible.
 
 ## Version History
 
-### 0.0.1 (upcoming)
+### 0.0.1
 
 Released formats:
 * mlpx 0.0.1
 * wavegen 0.0.4
+
+### 0.0.2 (upcoming)
+
 
 ## Future Work
 
