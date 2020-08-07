@@ -1,0 +1,37 @@
+# sbt gitignore file
+# Source: https://alvinalexander.com/source-code/scala/sample-gitignore-file-scala-sbt-intellij-eclipse/
+
+# Build folders
+bin/
+project/
+target/
+build/
+
+# Keep sbt config
+!build.sbt
+
+# Eclipse
+build
+.classpath
+.project
+.settings
+.worksheet
+
+# Intellij idea
+*.log
+*.iml
+*.ipr
+*.iws
+.idea
+
+# Mac
+.DS_Store
+
+# Other
+.history
+.scala_dependencies
+.cache
+.cache-main
+
+# General
+*.class
